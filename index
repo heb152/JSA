@@ -595,7 +595,7 @@ footer strong { color: var(--pitt-blue); }
 
     <div class="api-row">
       <label>🔑 API Key:</label>
-      <input type="password" id="apiKey" placeholder="Paste your API key here..." value="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" />
+      <input type="password" id="apiKey" placeholder="Paste your API key here..." />
       <a class="api-link" id="apiLink" href="#" target="_blank">Get API Key →</a>
     </div>
     <div class="groq-limit-badge" id="groqLimitBadge">
