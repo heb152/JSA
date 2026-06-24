@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSA Multiagent System — University of Pittsburgh</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --pitt-blue: #003594;
+  --pitt-gold: #FFB81C;
+  --pitt-gold-light: #FFC94D;
+  --pitt-blue-light: #1a4a9e;
+  --bg: #ffffff;
+  --surface: #f8f9fc;
+  --surface2: #eef1f7;
+  --border: #dde2ef;
+  --text: #1a1f36;
+  --text-muted: #6b7280;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--pitt-blue);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  box-shadow: 0 2px 8px rgba(0,53,148,0.15);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pitt-logo {
+  width: 38px; height: 38px;
+  background: var(--pitt-gold);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 800;
+  color: var(--pitt-blue);
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -1px;
+}
+
+.header-title { color: white; }
+.header-title h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+.header-title p { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+
+.header-badge {
+  background: rgba(255,184,28,0.15);
+  border: 1px solid rgba(255,184,28,0.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--pitt-gold);
+  font-weight: 500;
+}
+
+/* ── GOLD BAR ── */
+.gold-bar {
+  height: 4px;
+  background: var(--pitt-gold);
+}
+
+/* ── CONTAINER ── */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 36px 24px;
+}
+
+/* ── SECTION CARD ── */
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0,53,148,0.06);
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pitt-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title::before {
+  content: '';
+  display: block;
+  width: 3px; height: 16px;
+  background: var(--pitt-gold);
+  border-radius: 2px;
+}
+
+/* ── PROVIDER SELECTOR ── */
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  .provider-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.provider-btn {
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface);
+  font-family: 'Inter', sans-serif;
+}
+
+.provider-btn:hover { border-color: var(--pitt-blue); }
+
+.provider-btn.selected {
+  border-color: var(--pitt-blue);
+  background: rgba(0,53,148,0.05);
+}
+
+.provider-icon { font-size: 22px; margin-bottom: 5px; }
+.provider-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.provider-tag {
+  font-size: 10px;
+  color: var(--success);
+  background: rgba(22,163,74,0.1);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-top: 3px;
+  display: inline-block;
+}
+.provider-tag.paid { color: var(--warning); background: rgba(217,119,6,0.1); }
+
+/* ── MODEL SELECT ── */
+.model-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.model-row label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+select {
+  flex: 1;
+  min-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+select:focus { border-color: var(--pitt-blue); }
+
+/* ── API KEY ── */
+.api-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.api-row label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.api-row input {
+  flex: 1;
+  min-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.api-row input:focus { border-color: var(--pitt-blue); }
+
+.api-link {
+  font-size: 12px;
+  color: var(--pitt-blue);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.api-link:hover { text-decoration: underline; }
+
+/* ── GROQ LIMIT BADGE ── */
+.groq-limit-badge {
+  display: none;
+  margin-top: 12px;
+  background: rgba(0,53,148,0.05);
+  border: 1px solid rgba(0,53,148,0.15);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.groq-limit-badge strong { color: var(--pitt-blue); }
+
+/* ── TASK INPUT ── */
+textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  resize: vertical;
+  min-height: 90px;
+  outline: none;
+  transition: border-color 0.2s;
+  line-height: 1.6;
+}
+textarea:focus { border-color: var(--pitt-blue); }
+
+
+
+/* ── QUICK TASKS ── */
+.quick-tasks {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.quick-tasks span { font-size: 12px; color: var(--text-muted); }
+.quick-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.quick-btn:hover {
+  border-color: var(--pitt-blue);
+  color: var(--pitt-blue);
+  background: rgba(0,53,148,0.05);
+}
+
+/* ── RUN BUTTON ── */
+.run-btn {
+  margin-top: 18px;
+  width: 100%;
+  background: var(--pitt-blue);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.run-btn:hover { background: var(--pitt-blue-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,53,148,0.2); }
+.run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ── PROGRESS ── */
+.progress-section {
+  display: none;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0,53,148,0.06);
+}
+
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 600px) { .agents-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.agent-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s;
+}
+.agent-card.active { border-color: var(--pitt-gold); background: rgba(255,184,28,0.05); }
+.agent-card.done { border-color: var(--success); background: rgba(22,163,74,0.04); }
+
+.agent-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.agent-card.active .agent-dot { background: var(--pitt-gold); box-shadow: 0 0 8px var(--pitt-gold); animation: pulse 1s infinite; }
+.agent-card.done .agent-dot { background: var(--success); }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.agent-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.agent-status { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.agent-card.active .agent-status { color: var(--warning); }
+.agent-card.done .agent-status { color: var(--success); }
+
+.feedback-badge {
+  display: none;
+  background: rgba(217,119,6,0.08);
+  border: 1px solid rgba(217,119,6,0.25);
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--warning);
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── ERROR ── */
+.error-box {
+  display: none;
+  background: rgba(220,38,38,0.06);
+  border: 1px solid rgba(220,38,38,0.2);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 13px;
+  color: var(--danger);
+  margin-bottom: 18px;
+}
+
+/* ── REPORT ── */
+.report-section { display: none; }
+
+.report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.report-header h2 { font-size: 18px; font-weight: 700; color: var(--pitt-blue); }
+
+.export-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.export-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+.export-btn:hover { border-color: var(--pitt-blue); color: var(--pitt-blue); }
+.export-btn-primary {
+  background: var(--pitt-blue);
+  color: white;
+  border-color: var(--pitt-blue);
+}
+.export-btn-primary:hover { background: var(--pitt-blue-light); color: white; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 18px;
+}
+.tab {
+  flex: 1;
+  padding: 9px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-muted);
+  border: none;
+  background: transparent;
+  font-family: 'Inter', sans-serif;
+}
+.tab.active { background: var(--pitt-blue); color: white; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── TABLE ── */
+.table-wrapper { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead tr { background: var(--pitt-blue); }
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.85);
+  border-bottom: none;
+  white-space: nowrap;
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+  color: var(--text);
+}
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) td { background: var(--surface); }
+tr:hover td { background: rgba(0,53,148,0.03); }
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-p { background: rgba(0,53,148,0.1); color: var(--pitt-blue); }
+.badge-c-low { background: rgba(22,163,74,0.12); color: var(--success); }
+.badge-c-mid { background: rgba(217,119,6,0.12); color: var(--warning); }
+.badge-c-high { background: rgba(220,38,38,0.12); color: var(--danger); }
+
+/* ── SUMMARY CARDS ── */
+.report-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--pitt-gold);
+  border-radius: 10px;
+  padding: 20px 22px;
+  margin-bottom: 12px;
+}
+.report-card h4 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--pitt-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+}
+.report-card p { font-size: 14px; line-height: 1.7; color: var(--text-muted); }
+
+/* ── RAW OUTPUT ── */
+.raw-output {
+  background: var(--pitt-blue);
+  border-radius: 10px;
+  padding: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.85);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+footer strong { color: var(--pitt-blue); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="pitt-logo">Pitt</div>
+    <div class="header-title">
+      <h1>JSA Multiagent System</h1>
+      <p>Construction Job Safety Analysis · 6 Specialized Agents</p>
+    </div>
+  </div>
+  <span class="header-badge">Research Tool</span>
+</header>
+<div class="gold-bar"></div>
+
+<div class="container">
+
+  <!-- PROVIDER & MODEL -->
+  <div class="card">
+    <div class="card-title">AI Provider & Model</div>
+
+    <div class="provider-grid">
+      <div class="provider-btn selected" onclick="selectProvider('groq')">
+        <div class="provider-icon">⚡</div>
+        <div class="provider-name">Groq</div>
+        <div class="provider-tag">Free</div>
+      </div>
+      <div class="provider-btn" onclick="selectProvider('openai')">
+        <div class="provider-icon">🤖</div>
+        <div class="provider-name">OpenAI</div>
+        <div class="provider-tag paid">Paid</div>
+      </div>
+      <div class="provider-btn" onclick="selectProvider('gemini')">
+        <div class="provider-icon">✨</div>
+        <div class="provider-name">Gemini</div>
+        <div class="provider-tag">Free Tier</div>
+      </div>
+      <div class="provider-btn" onclick="selectProvider('anthropic')">
+        <div class="provider-icon">🧠</div>
+        <div class="provider-name">Anthropic</div>
+        <div class="provider-tag paid">Paid</div>
+      </div>
+    </div>
+
+    <div class="model-row">
+      <label>Model:</label>
+      <select id="modelSelect"></select>
+    </div>
+
+    <div class="api-row">
+      <label>🔑 API Key:</label>
+      <input type="password" id="apiKey" placeholder="Paste your API key here..." value="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" />
+      <a class="api-link" id="apiLink" href="#" target="_blank">Get API Key →</a>
+    </div>
+    <div class="groq-limit-badge" id="groqLimitBadge">
+      ⚡ Groq Free Tier · Limit: <strong>12,000 tokens/min</strong> · ~<strong>29 analyses/day</strong> · Delay between agents: <strong>30s</strong>
+    </div>
+  </div>
+
+  <!-- TASK INPUT -->
+  <div class="card">
+    <div class="card-title">Construction Task</div>
+    <textarea id="taskInput" placeholder="Describe the construction task — e.g. Tunnel lining and support system installation"></textarea>
+
+    <div class="quick-tasks">
+      <span>Quick select:</span>
+      <button class="quick-btn" onclick="setTask('Tunnel lining and support system installation')">Tunnel Lining</button>
+      <button class="quick-btn" onclick="setTask('Scaffolding erection and dismantling')">Scaffolding</button>
+      <button class="quick-btn" onclick="setTask('Concrete pouring for high-rise foundation')">Concrete Pouring</button>
+      <button class="quick-btn" onclick="setTask('Electrical wiring installation in commercial building')">Electrical Wiring</button>
+      <button class="quick-btn" onclick="setTask('Steel structural frame erection')">Steel Erection</button>
+      <button class="quick-btn" onclick="setTask('Excavation and trenching for underground utilities')">Excavation</button>
+    </div>
+
+
+
+    <button class="run-btn" id="runBtn" onclick="runJSA()">
+      ▶ Run Job Safety Analysis
+    </button>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- PROGRESS -->
+  <div class="progress-section" id="progressSection">
+    <div class="card-title">Agent Progress</div>
+    <div class="agents-grid">
+      <div class="agent-card" id="agent-1">
+        <div class="agent-dot"></div>
+        <div>
+          <div class="agent-name">Project Manager</div>
+          <div class="agent-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="agent-card" id="agent-2">
+        <div class="agent-dot"></div>
+        <div>
+          <div class="agent-name">Risk Identifier</div>
+          <div class="agent-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="agent-card" id="agent-3">
+        <div class="agent-dot"></div>
+        <div>
+          <div class="agent-name">Risk Assessor</div>
+          <div class="agent-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="agent-card" id="agent-4">
+        <div class="agent-dot"></div>
+        <div>
+          <div class="agent-name">Risk Manager</div>
+          <div class="agent-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="agent-card" id="agent-5">
+        <div class="agent-dot"></div>
+        <div>
+          <div class="agent-name">Safety Manager</div>
+          <div class="agent-status">Waiting...</div>
+        </div>
+      </div>
+      <div class="agent-card" id="agent-6">
+        <div class="agent-dot"></div>
+        <div>
+          <div class="agent-name">Reporter</div>
+          <div class="agent-status">Waiting...</div>
+        </div>
+      </div>
+    </div>
+    <div class="feedback-badge" id="feedbackBadge">
+      🔄 Feedback loop triggered — Risk Assessor is revising assessments...
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div class="report-section" id="reportSection">
+    <div class="report-header">
+      <h2>📋 JSA Report</h2>
+      <div class="export-group">
+        <button class="export-btn" onclick="exportTXT()">⬇ TXT</button>
+        <button class="export-btn" onclick="exportCSV()">⬇ CSV</button>
+        <button class="export-btn export-btn-primary" onclick="exportHTML()">⬇ HTML Report</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('table')">Risk Table</button>
+      <button class="tab" onclick="showTab('summary')">Summary</button>
+      <button class="tab" onclick="showTab('raw')">Raw Output</button>
+    </div>
+    <div class="tab-content active" id="tab-table">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Job Step</th><th>Hazard</th><th>Likelihood</th><th>Impact</th><th>Preventive Measures</th>
+            </tr>
+          </thead>
+          <tbody id="reportTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="tab-content" id="tab-summary">
+      <div id="summaryContent"></div>
+    </div>
+    <div class="tab-content" id="tab-raw">
+      <div class="raw-output" id="rawOutput"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span><strong>University of Pittsburgh</strong> · Civil Engineering · JSA Multiagent Research</span>
+</footer>
+
+<script>
+// ── PROVIDERS & MODELS ───────────────────────────────────
+const PROVIDERS = {
+  groq: {
+    name: 'Groq',
+    baseURL: 'https://api.groq.com/openai/v1/chat/completions',
+    apiLink: 'https://console.groq.com/keys',
+    type: 'openai-compat',
+    delay: 20000,
+    models: [
+      { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B (Recommended)' },
+      { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B (Fast)' },
+      { id: 'gemma2-9b-it', name: 'Gemma 2 9B' },
+      { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B' },
+    ]
+  },
+  openai: {
+    name: 'OpenAI',
+    baseURL: 'https://api.openai.com/v1/chat/completions',
+    apiLink: 'https://platform.openai.com/api-keys',
+    type: 'openai-compat',
+    delay: 2000,
+    models: [
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Recommended)' },
+      { id: 'gpt-4o', name: 'GPT-4o' },
+      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo' },
+      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo (Fast)' },
+    ]
+  },
+  gemini: {
+    name: 'Gemini',
+    baseURL: 'https://generativelanguage.googleapis.com/v1beta/models',
+    apiLink: 'https://aistudio.google.com/app/apikey',
+    type: 'gemini',
+    delay: 5000,
+    models: [
+      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Recommended)' },
+      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' },
+      { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash 8B (Fast)' },
+      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
+    ]
+  },
+  anthropic: {
+    name: 'Anthropic',
+    baseURL: 'https://api.anthropic.com/v1/messages',
+    apiLink: 'https://console.anthropic.com/settings/keys',
+    type: 'anthropic',
+    delay: 3000,
+    models: [
+      { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6 (Recommended)' },
+      { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5' },
+      { id: 'claude-opus-4-6', name: 'Claude Opus 4.6' },
+    ]
+  }
+};
+
+let currentProvider = 'groq';
+
+let fullRawOutput = '';
+
+// ── INIT ─────────────────────────────────────────────────
+function selectProvider(p) {
+  currentProvider = p;
+  document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  updateModels();
+  document.getElementById('apiLink').href = PROVIDERS[p].apiLink;
+  document.getElementById('apiKey').placeholder = `Paste your ${PROVIDERS[p].name} API key...`;
+  // Show groq limit badge only for Groq
+  document.getElementById('groqLimitBadge').style.display = p === 'groq' ? 'block' : 'none';
+}
+
+function updateModels() {
+  const sel = document.getElementById('modelSelect');
+  sel.innerHTML = '';
+  PROVIDERS[currentProvider].models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.name;
+    sel.appendChild(opt);
+  });
+}
+
+function setTask(t) { document.getElementById('taskInput').value = t; }
+
+function showTab(name) {
+  const names = ['table','summary','raw'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i]===name));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function setAgent(n, status) {
+  const card = document.getElementById('agent-'+n);
+  card.classList.remove('active','done');
+  const st = card.querySelector('.agent-status');
+  if (status==='active') { card.classList.add('active'); st.textContent='Running...'; }
+  else if (status==='done') { card.classList.add('done'); st.textContent='Done ✓'; }
+  else { st.textContent='Waiting...'; }
+}
+
+function resetAgents() {
+  for(let i=1;i<=6;i++) setAgent(i,'waiting');
+  document.getElementById('feedbackBadge').style.display='none';
+}
+
+
+// ── API CALLS ────────────────────────────────────────────
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function sleepWithCountdown(ms, nextAgentNum) {
+  const card = document.getElementById('agent-'+nextAgentNum);
+  const st = card ? card.querySelector('.agent-status') : null;
+  const secs = Math.ceil(ms/1000);
+  for (let i=secs; i>0; i--) {
+    if (st) st.textContent = `Starting in ${i}s...`;
+    await sleep(1000);
+  }
+  if (st) st.textContent = 'Waiting...';
+}
+
+async function callAPI(systemPrompt, userMessage) {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const model = document.getElementById('modelSelect').value;
+  const provider = PROVIDERS[currentProvider];
+
+  if (provider.type === 'openai-compat') {
+    const res = await fetch(provider.baseURL, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+apiKey },
+      body: JSON.stringify({ model, temperature:0.1, max_tokens:4096,
+        messages:[{role:'system',content:systemPrompt},{role:'user',content:userMessage}]
+      })
+    });
+    if (!res.ok) { const e=await res.json(); throw new Error(e.error?.message||'API Error'); }
+    const d = await res.json();
+    return d.choices[0].message.content;
+
+  } else if (provider.type === 'gemini') {
+    const url = `${provider.baseURL}/${model}:generateContent?key=${apiKey}`;
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{parts:[{text: systemPrompt+'\n\n'+userMessage}]}],
+        generationConfig:{temperature:0.1,maxOutputTokens:4096}
+      })
+    });
+    if (!res.ok) { const e=await res.json(); throw new Error(e.error?.message||'Gemini API Error'); }
+    const d = await res.json();
+    return d.candidates[0].content.parts[0].text;
+
+  } else if (provider.type === 'anthropic') {
+    const res = await fetch(provider.baseURL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({ model, max_tokens:4096,
+        system: systemPrompt,
+        messages:[{role:'user',content:userMessage}]
+      })
+    });
+    if (!res.ok) { const e=await res.json(); throw new Error(e.error?.message||'Anthropic API Error'); }
+    const d = await res.json();
+    return d.content[0].text;
+  }
+}
+
+
+// ── AGENTS ───────────────────────────────────────────────
+async function agentProjectManager(job) {
+  return await callAPI(
+    `You are a highly skilled project manager with expertise in construction projects. Break down the given construction task into clear, detailed implementation steps focusing on the execution phase. Format as a numbered list.`,
+    `Break down this construction task into steps: ${job}`
+  );
+}
+async function agentRiskIdentifier(steps) {
+  return await callAPI(
+    `You are an expert construction safety inspector. Identify all potential hazards for each step. Be specific and thorough.`,
+    `Identify hazards for each step:\n${steps}`
+  );
+}
+async function agentRiskAssessor(hazards, feedback=null) {
+  const sys = `You are a construction risk assessment expert. Evaluate each hazard using:
+LIKELIHOOD: P1(<1%) P2(1-5%) P3(5-25%) P4(25-50%) P5(50-75%) P6(>75%)
+IMPACT: C1(insignificant) C2(minor) C3(moderate) C4(significant) C5(major/1 fatality) C6(catastrophic)
+For each hazard provide likelihood, impact, and justification.${feedback?' Incorporate feedback provided.':''}`;
+  return await callAPI(sys, `Assess hazards:\n${hazards}${feedback?'\n\nFeedback:\n'+feedback:''}`);
+}
+async function agentRiskManager(assessments) {
+  return await callAPI(
+    `You are a senior risk manager. Review assessments. Respond "APPROVED" if accurate, or "REVISION NEEDED" with specific feedback. Do NOT reassign scores yourself.`,
+    `Review:\n${assessments}`
+  );
+}
+async function agentSafetyManager(assessments) {
+  return await callAPI(
+    `You are a construction safety manager. Develop preventive measures for moderate and high-risk hazards (P3C3+). Include: preventive measures, PPE, engineering/admin controls.`,
+    `Develop controls for:\n${assessments}`
+  );
+}
+async function agentReporter(job, steps, hazards, assessments, controls) {
+  return await callAPI(
+    `You are a technical report writer for construction safety. Compile a JSA report with:
+1. A table — format rows as: STEP | HAZARD | P# | C# | MEASURES (pipe-delimited)
+2. Sections: ### Findings, ### Recommendations, ### Conclusion, ### Next Steps
+Only include moderate and high-risk hazards.`,
+    `JSA for: ${job}\nSteps: ${steps}\nHazards: ${hazards}\nAssessments: ${assessments}\nControls: ${controls}`
+  );
+}
+
+// ── MAIN RUNNER ──────────────────────────────────────────
+async function runJSA() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const task = document.getElementById('taskInput').value.trim();
+  if (!apiKey) { showError('Please enter your API Key.'); return; }
+  if (!task) { showError('Please enter a construction task.'); return; }
+
+  hideError();
+  fullRawOutput = '';
+  // Only delay for Groq due to rate limiting
+  const delay = currentProvider === 'groq' ? 30000 : 500;
+
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('runBtn').textContent = '⏳ Running Analysis...';
+  document.getElementById('progressSection').style.display = 'block';
+  document.getElementById('reportSection').style.display = 'none';
+  resetAgents();
+
+  try {
+    setAgent(1,'active');
+    const steps = await agentProjectManager(task);
+    fullRawOutput += '🔵 AGENT 1 — PROJECT MANAGER\n'+steps+'\n\n';
+    setAgent(1,'done');
+
+    await sleepWithCountdown(delay,2);
+    setAgent(2,'active');
+    const hazards = await agentRiskIdentifier(steps);
+    fullRawOutput += '🟡 AGENT 2 — RISK IDENTIFIER\n'+hazards+'\n\n';
+    setAgent(2,'done');
+
+    await sleepWithCountdown(delay,3);
+    setAgent(3,'active');
+    let assessments = await agentRiskAssessor(hazards);
+    fullRawOutput += '🟠 AGENT 3 — RISK ASSESSOR (Pass 1)\n'+assessments+'\n\n';
+    setAgent(3,'done');
+
+    await sleepWithCountdown(delay,4);
+    setAgent(4,'active');
+    let review = await agentRiskManager(assessments);
+    fullRawOutput += '🔴 AGENT 4 — RISK MANAGER\n'+review+'\n\n';
+    setAgent(4,'done');
+
+    if (review.includes('REVISION NEEDED')) {
+      document.getElementById('feedbackBadge').style.display='flex';
+      await sleepWithCountdown(delay,3);
+      setAgent(3,'active');
+      assessments = await agentRiskAssessor(hazards,review);
+      fullRawOutput += '🔄 AGENT 3 — REVISED\n'+assessments+'\n\n';
+      setAgent(3,'done');
+
+      await sleepWithCountdown(delay,4);
+      setAgent(4,'active');
+      review = await agentRiskManager(assessments);
+      fullRawOutput += '🔄 AGENT 4 — RE-REVIEW\n'+review+'\n\n';
+      setAgent(4,'done');
+    }
+
+    await sleepWithCountdown(delay,5);
+    setAgent(5,'active');
+    const controls = await agentSafetyManager(assessments);
+    fullRawOutput += '🟢 AGENT 5 — SAFETY MANAGER\n'+controls+'\n\n';
+    setAgent(5,'done');
+
+    await sleepWithCountdown(delay,6);
+    setAgent(6,'active');
+    const report = await agentReporter(task,steps,hazards,assessments,controls);
+    fullRawOutput += '🟣 AGENT 6 — REPORTER\n'+report+'\n\n';
+    setAgent(6,'done');
+
+    renderTable(parseReport(report));
+    renderSummary(report);
+    document.getElementById('rawOutput').textContent = fullRawOutput;
+    document.getElementById('reportSection').style.display = 'block';
+    document.getElementById('reportSection').scrollIntoView({behavior:'smooth'});
+
+  } catch(err) { showError('Error: '+err.message); }
+
+  document.getElementById('runBtn').disabled = false;
+  document.getElementById('runBtn').textContent = '▶ Run Job Safety Analysis';
+}
+
+// ── RENDER ───────────────────────────────────────────────
+function parseReport(text) {
+  const rows=[];
+  for (const line of text.split('\n')) {
+    if (!line.includes('|')) continue;
+    const cols=line.split('|').map(c=>c.trim()).filter(c=>c);
+    if (cols.length<4) continue;
+    if (cols[0].toLowerCase().includes('job step')||cols[0].startsWith('-')||cols[0]==='---') continue;
+    rows.push(cols);
+  }
+  return rows;
+}
+
+function getCBadge(c) {
+  const n=parseInt(c.replace(/[^0-9]/g,''));
+  if(n<=2) return 'badge-c-low';
+  if(n<=4) return 'badge-c-mid';
+  return 'badge-c-high';
+}
+
+function renderTable(rows) {
+  const tbody=document.getElementById('reportTableBody');
+  tbody.innerHTML='';
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px">No table parsed — check Raw Output tab</td></tr>';
+    return;
+  }
+  rows.forEach(cols=>{
+    const tr=document.createElement('tr');
+    const l=cols[2]||'', im=cols[3]||'';
+    tr.innerHTML=`<td>${cols[0]||''}</td><td>${cols[1]||''}</td>
+      <td><span class="badge badge-p">${l}</span></td>
+      <td><span class="badge ${getCBadge(im)}">${im}</span></td>
+      <td>${cols.slice(4).join(' ')||''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderSummary(text) {
+  const sections=['Findings','Recommendations','Conclusion','Next Steps'];
+  const container=document.getElementById('summaryContent');
+  container.innerHTML='';
+  sections.forEach(sec=>{
+    const rx=new RegExp(`###?\\s*${sec}([\\s\\S]*?)(?=###?\\s*(${sections.join('|')})|$)`,'i');
+    const m=text.match(rx);
+    if(m){
+      const card=document.createElement('div');
+      card.className='report-card';
+      card.innerHTML=`<h4>${sec}</h4><p>${m[1].replace(/\*\*/g,'').trim().replace(/\n/g,'<br>')}</p>`;
+      container.appendChild(card);
+    }
+  });
+  if(!container.innerHTML){
+    container.innerHTML=`<div class="report-card"><h4>Report</h4><p style="white-space:pre-wrap">${text}</p></div>`;
+  }
+}
+
+function showError(msg){
+  const b=document.getElementById('errorBox');
+  b.textContent='⚠️ '+msg; b.style.display='block';
+}
+function hideError(){ document.getElementById('errorBox').style.display='none'; }
+
+function exportTXT(){
+  const blob=new Blob([fullRawOutput],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='JSA_Report.txt';
+  a.click();
+}
+
+function exportCSV(){
+  const rows = parseReport(document.getElementById('rawOutput').textContent || fullRawOutput);
+  if(!rows.length){ alert('No table data to export. Run analysis first.'); return; }
+  const headers = ['Job Step','Hazard','Likelihood','Impact','Preventive Measures'];
+  const csvRows = [headers.join(',')];
+  rows.forEach(cols => {
+    const escaped = cols.map(c => '"' + (c||'').replace(/"/g,'""') + '"');
+    while(escaped.length < 5) escaped.push('""');
+    csvRows.push(escaped.slice(0,5).join(','));
+  });
+  const blob=new Blob([csvRows.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='JSA_Report.csv';
+  a.click();
+}
+
+function exportHTML(){
+  const task = document.getElementById('taskInput').value.trim();
+  const model = document.getElementById('modelSelect').value;
+  const provider = document.querySelector('.provider-btn.selected .provider-name').textContent;
+  const rows = parseReport(fullRawOutput);
+  const date = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+
+  // Build table rows
+  let tableRows = '';
+  rows.forEach(cols => {
+    const l = cols[2]||'', im = cols[3]||'';
+    const imNum = parseInt(im.replace(/[^0-9]/g,''));
+    const imColor = imNum<=2 ? '#16a34a' : imNum<=4 ? '#d97706' : '#dc2626';
+    tableRows += `<tr>
+      <td>${cols[0]||''}</td>
+      <td>${cols[1]||''}</td>
+      <td><span style="background:rgba(0,53,148,0.1);color:#003594;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:12px;font-weight:600">${l}</span></td>
+      <td><span style="background:${imColor}22;color:${imColor};padding:2px 8px;border-radius:4px;font-family:monospace;font-size:12px;font-weight:600">${im}</span></td>
+      <td>${cols.slice(4).join(' ')||''}</td>
+    </tr>`;
+  });
+
+  // Build summary
+  const summaryEl = document.getElementById('summaryContent');
+  let summaryHTML = '';
+  summaryEl.querySelectorAll('.report-card').forEach(card => {
+    const title = card.querySelector('h4').textContent;
+    const content = card.querySelector('p').innerHTML;
+    summaryHTML += `
+      <div style="background:#f8f9fc;border:1px solid #dde2ef;border-left:4px solid #FFB81C;border-radius:10px;padding:18px 20px;margin-bottom:12px">
+        <h4 style="font-size:11px;font-weight:700;color:#003594;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">${title}</h4>
+        <p style="font-size:13px;line-height:1.7;color:#6b7280">${content}</p>
+      </div>`;
+  });
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSA Report — ${task}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  body { font-family:'Inter',sans-serif; margin:0; padding:0; background:#fff; color:#1a1f36; }
+  .header { background:#003594; padding:24px 40px; }
+  .header h1 { color:white; font-size:20px; font-weight:700; margin:0 0 4px; }
+  .header p { color:rgba(255,255,255,0.65); font-size:13px; margin:0; }
+  .gold-bar { height:4px; background:#FFB81C; }
+  .body { max-width:1000px; margin:0 auto; padding:36px 24px; }
+  .meta { display:flex; gap:20px; flex-wrap:wrap; background:#f8f9fc; border:1px solid #dde2ef; border-radius:10px; padding:16px 20px; margin-bottom:28px; }
+  .meta-item { font-size:13px; color:#6b7280; }
+  .meta-item strong { color:#003594; display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:3px; }
+  h2 { font-size:15px; font-weight:700; color:#003594; text-transform:uppercase; letter-spacing:0.8px; margin:28px 0 14px; display:flex; align-items:center; gap:8px; }
+  h2::before { content:''; display:block; width:3px; height:16px; background:#FFB81C; border-radius:2px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:28px; }
+  thead tr { background:#003594; }
+  th { padding:11px 14px; text-align:left; color:rgba(255,255,255,0.85); font-size:11px; text-transform:uppercase; letter-spacing:0.6px; font-weight:600; }
+  td { padding:11px 14px; border-bottom:1px solid #dde2ef; vertical-align:top; line-height:1.5; }
+  tr:nth-child(even) td { background:#f8f9fc; }
+  .footer { border-top:1px solid #dde2ef; padding:16px 40px; font-size:11px; color:#9ca3af; display:flex; justify-content:space-between; }
+  @media print { .footer { position:fixed; bottom:0; width:100%; } }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Job Safety Analysis Report</h1>
+  <p>University of Pittsburgh · Civil Engineering · JSA Multiagent System</p>
+</div>
+<div class="gold-bar"></div>
+<div class="body">
+  <div class="meta">
+    <div class="meta-item"><strong>Task</strong>${task}</div>
+    <div class="meta-item"><strong>Date</strong>${date}</div>
+    <div class="meta-item"><strong>Model</strong>${provider} · ${model}</div>
+    <div class="meta-item"><strong>System</strong>6-Agent Multiagent JSA</div>
+  </div>
+
+  <h2>Risk Assessment Table</h2>
+  <table>
+    <thead><tr><th>Job Step</th><th>Hazard</th><th>Likelihood</th><th>Impact</th><th>Preventive Measures</th></tr></thead>
+    <tbody>${tableRows}</tbody>
+  </table>
+
+  <h2>Summary</h2>
+  ${summaryHTML}
+</div>
+<div class="footer">
+  <span>Generated by JSA Multiagent System · University of Pittsburgh</span>
+</div>
+</body>
+</html>`;
+
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`JSA_Report_${task.replace(/\s+/g,'_').substring(0,30)}.html`;
+  a.click();
+}
+
+// Init
+updateModels();
+document.getElementById('apiLink').href = PROVIDERS['groq'].apiLink;
+document.getElementById('groqLimitBadge').style.display = 'block';
+</script>
+</body>
+</html>
