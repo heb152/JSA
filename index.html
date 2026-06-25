@@ -582,7 +582,9 @@ footer {
 }
 footer strong { color: var(--pitt-blue); }
 
-/* ── WIZARD ── */
+#ragActivitiesList { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+
+/* ── WIZARD (legacy) ── */
 .wizard-card { padding: 20px; }
 .wizard-step { }
 .wizard-q {
@@ -927,14 +929,29 @@ footer strong { color: var(--pitt-blue); }
         </div>
         <button class="rag-remove-btn" onclick="ragReset()">✕ Remove</button>
       </div>
-      <div style="margin-top:10px;padding:10px 14px;background:rgba(0,53,148,0.05);border-radius:8px;font-size:12px;color:var(--pitt-blue)">
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(0,53,148,0.05);border-radius:8px;font-size:12px;color:var(--pitt-blue);margin-bottom:12px">
         ℹ️ JSA will be generated <strong>based on this document only</strong>.
+      </div>
+      <!-- Activities extracted from document -->
+      <div id="ragActivitiesSection">
+        <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px">
+          📋 Activities found in this document:
+        </div>
+        <div id="ragActivitiesList" style="font-size:12px;color:var(--text-muted)">
+          ⏳ Extracting activities...
+        </div>
       </div>
     </div>
 
-    <!-- State D: Skipped -->
+    <!-- State D: Skipped — ask about activity suggestions -->
     <div id="ragStateD" style="display:none">
-      <div style="font-size:13px;color:var(--text-muted)">No guide — JSA will use general AI knowledge.</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">No guide — JSA will use general AI knowledge.</div>
+      <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:12px">Would you like AI to suggest common highway pavement activities?</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="wizard-btn wizard-btn-yes" onclick="suggestActivities()">✅ Yes, suggest activities</button>
+        <button class="wizard-btn wizard-btn-no" onclick="skipSuggestions()">➡️ No, I'll type manually</button>
+      </div>
+      <div id="suggestedActivities" style="margin-top:14px"></div>
       <button class="wizard-reset" style="margin-top:8px" onclick="ragReset()">← Change</button>
     </div>
   </div>
@@ -943,7 +960,7 @@ footer strong { color: var(--pitt-blue); }
   <div class="card" id="taskCard" style="display:none">
     <div class="card-title">Construction Task</div>
     <textarea id="taskInput" placeholder="Describe the construction task — e.g. Tunnel lining and support system installation"></textarea>
-    <div class="quick-tasks">
+    <div class="quick-tasks" id="quickTasksArea">
       <span>Quick select:</span>
       <button class="quick-btn" onclick="setTask('Pavement crack sealing with cold-pour sealant on highway')">🟢 Crack Sealing</button>
       <button class="quick-btn" onclick="setTask('Concrete pavement joint sealing and repair on highway')">🟢 Joint Sealing</button>
@@ -1232,13 +1249,26 @@ async function callAPI(systemPrompt, userMessage) {
 
 
 // ── AGENTS ───────────────────────────────────────────────
+
+// Strict RAG system prompt — used when document is loaded
+function ragSystemPrompt(role) {
+  return `You are a ${role}. A specific reference document has been provided.
+STRICT RULES:
+1. Base your analysis ONLY on information found in the provided document.
+2. If the task or topic is NOT covered in the document, respond with: "⚠️ This topic is not covered in the provided document. Please verify with the appropriate safety manual or consult a qualified professional."
+3. Do NOT use general knowledge, training data, or assumptions outside the document.
+4. Always cite or reference specific sections/content from the document when possible.`;
+}
+
 async function agentProjectManager(job) {
   if (ragActive && ragChunks.length) {
-    const ctx = ragKeywordSearch(job, 3).join('\n\n');
-    const docNote = ctx ? `\n\nReference document context:\n${ctx}\n\nBase your step breakdown on this document where relevant.` : '';
+    const ctx = ragKeywordSearch(job, 5).join('\n\n');
+    if (!ctx || ctx.trim().length < 50) {
+      return `⚠️ The task "${job}" does not appear to be covered in the provided document. The document may not contain relevant procedures for this activity. Please verify with the appropriate manual.`;
+    }
     return await callAPI(
-      `You are a project manager. Break down the construction task into clear implementation steps based on the provided document. Format as a numbered list.`,
-      `Task: ${job}${docNote}`
+      ragSystemPrompt('project manager specializing in construction safety'),
+      `Task: ${job}\n\nDocument content:\n${ctx}\n\nBreak down this task into implementation steps based ONLY on the document above. Format as a numbered list.`
     );
   }
   return await callAPI(
@@ -1246,15 +1276,23 @@ async function agentProjectManager(job) {
     `Break down this construction task into steps: ${job}`
   );
 }
+
 async function agentRiskIdentifier(steps, ragContext='') {
-  const useDoc = ragActive && ragContext && ragContext.length > 50;
-  const sysPrompt = useDoc
-    ? `You are an expert construction safety inspector. Identify all potential hazards for each step based ONLY on the provided reference document. Do not use general knowledge — only reference what is stated in the document.`
-    : `You are an expert construction safety inspector. Identify all potential hazards for each step. Be specific and thorough.`;
-  const docNote = useDoc
-    ? `\n\nIMPORTANT — Base your analysis ONLY on this document:\n${ragContext}`
-    : '';
-  return await callAPI(sysPrompt, `Identify hazards for each step:\n${steps}${docNote}`);
+  const useDoc = ragActive && ragChunks.length;
+  if (useDoc) {
+    const ctx = ragContext && ragContext.length > 50 ? ragContext : ragKeywordSearch(steps.substring(0, 200), 5).join('\n\n');
+    if (!ctx || ctx.trim().length < 50) {
+      return `⚠️ No relevant hazard information found in the provided document for these steps. The document may not cover this activity.`;
+    }
+    return await callAPI(
+      ragSystemPrompt('construction safety inspector'),
+      `Identify hazards for each step based ONLY on the document below.\n\nSteps:\n${steps}\n\nDocument content:\n${ctx}`
+    );
+  }
+  return await callAPI(
+    `You are an expert construction safety inspector. Identify all potential hazards for each step. Be specific and thorough.`,
+    `Identify hazards for each step:\n${steps}`
+  );
 }
 
 // ── OSHA MATCHER ─────────────────────────────────────────
@@ -1301,30 +1339,47 @@ Only include genuinely relevant incidents. If none are relevant, say "No matchin
 }
 
 async function agentRiskAssessor(hazards, feedback=null, oshaEvidence=null) {
+  const ragNote = ragActive && ragChunks.length
+    ? `\nIMPORTANT: If any hazard says "not covered in document", rate it as "⚠️ Not in document" and skip scoring.`
+    : '';
   const sys = `You are a construction risk assessment expert. Evaluate each hazard using:
 LIKELIHOOD: P1(<1%) P2(1-5%) P3(5-25%) P4(25-50%) P5(50-75%) P6(>75%)
 IMPACT: C1(insignificant) C2(minor) C3(moderate) C4(significant) C5(major/1 fatality) C6(catastrophic)
 For each hazard provide likelihood, impact, and justification.
 ${oshaEvidence ? 'Use the provided OSHA real incident evidence to inform your likelihood and impact ratings.' : ''}
-${feedback?' Incorporate feedback provided.':''}`;
+${feedback ? 'Incorporate feedback provided.' : ''}${ragNote}`;
   const msg = `Assess hazards:\n${hazards}${oshaEvidence?'\n\nOSHA Evidence:\n'+oshaEvidence:''}${feedback?'\n\nFeedback:\n'+feedback:''}`;
   return await callAPI(sys, msg);
 }
+
 async function agentRiskManager(assessments) {
   return await callAPI(
     `You are a senior risk manager. Review assessments. Respond "APPROVED" if accurate, or "REVISION NEEDED" with specific feedback. Do NOT reassign scores yourself.`,
     `Review:\n${assessments}`
   );
 }
+
 async function agentSafetyManager(assessments) {
+  if (ragActive && ragChunks.length) {
+    const ctx = ragKeywordSearch(assessments.substring(0, 300), 4).join('\n\n');
+    const docNote = ctx ? `\n\nDocument reference:\n${ctx}\n\nBase your preventive measures on this document where possible.` : '';
+    return await callAPI(
+      `You are a construction safety manager. Develop preventive measures for moderate and high-risk hazards (P3C3+) based on the provided document. Include: preventive measures, PPE, engineering/admin controls. If a hazard is marked "Not in document", skip it.`,
+      `Develop controls for:\n${assessments}${docNote}`
+    );
+  }
   return await callAPI(
     `You are a construction safety manager. Develop preventive measures for moderate and high-risk hazards (P3C3+). Include: preventive measures, PPE, engineering/admin controls.`,
     `Develop controls for:\n${assessments}`
   );
 }
+
 async function agentReporter(job, steps, hazards, assessments, controls, oshaEvidence) {
   const oshaNote = oshaEvidence && !oshaEvidence.includes('No') ?
     `\n\nOSHA Real Incidents — include inline in table next to matching hazards as "⚠️ OSHA [year]: [brief]":\n${oshaEvidence}` : '';
+  const ragNote = ragActive && ragFileName
+    ? `\n\nNOTE: This JSA was generated based on document: "${ragFileName}". Mention this in the Findings section.`
+    : '';
   return await callAPI(
     `You are a professional construction safety report writer. Compile a clear, structured JSA report.
 
@@ -1332,6 +1387,7 @@ FORMAT REQUIREMENTS:
 1. Risk Table — pipe-delimited rows:
    STEP | HAZARD | P# | C# | OSHA EVIDENCE | PREVENTIVE MEASURES
    - OSHA EVIDENCE: match real incident if available (e.g. "⚠️ 2007: Worker fatal fall"), else write "—"
+   - Skip any hazard marked as "Not in document"
    - Only include P3C3 and above
 
 2. ### Key Statistics
@@ -1351,36 +1407,48 @@ FORMAT REQUIREMENTS:
 
 7. ### Next Steps
    Numbered list, max 4 items`,
-    `JSA for: ${job}\nSteps: ${steps}\nHazards: ${hazards}\nAssessments: ${assessments}\nControls: ${controls}${oshaNote}`
+    `JSA for: ${job}\nSteps: ${steps}\nHazards: ${hazards}\nAssessments: ${assessments}\nControls: ${controls}${oshaNote}${ragNote}`
   );
 }
 
 // ── OPTIONAL AGENTS ──────────────────────────────────────
 async function agentEquipmentSpecialist(steps, hazards) {
+  const docNote = ragActive && ragChunks.length
+    ? `\n\nDocument context:\n${ragKeywordSearch('equipment machinery safety', 3).join('\n\n')}\n\nBase your analysis on the document above. If equipment information is not in the document, state so.`
+    : '';
   return await callAPI(
-    `You are a heavy equipment safety specialist. Analyze the hazards specifically related to heavy machinery, vehicles, and mechanical equipment. For each equipment-related hazard provide additional specialized safety protocols and equipment-specific PPE requirements.`,
-    `Analyze equipment-related hazards:\nSteps: ${steps}\nHazards: ${hazards}`
+    ragActive && ragChunks.length ? ragSystemPrompt('heavy equipment safety specialist') : `You are a heavy equipment safety specialist. Analyze hazards related to heavy machinery and provide specialized safety protocols and PPE requirements.`,
+    `Analyze equipment-related hazards:\nSteps: ${steps}\nHazards: ${hazards}${docNote}`
   );
 }
 
 async function agentConfinedSpace(steps, hazards) {
+  const docNote = ragActive && ragChunks.length
+    ? `\n\nDocument context:\n${ragKeywordSearch('confined space entry trench', 3).join('\n\n')}`
+    : '';
   return await callAPI(
-    `You are a confined space entry specialist with expertise in OSHA 29 CFR 1926.1200. Identify all confined space hazards (tunnels, trenches, underground areas) and provide specific entry permits, atmospheric testing requirements, and rescue procedures.`,
-    `Analyze confined space hazards:\nSteps: ${steps}\nHazards: ${hazards}`
+    ragActive && ragChunks.length ? ragSystemPrompt('confined space entry specialist') : `You are a confined space entry specialist. Identify confined space hazards and provide entry permits, atmospheric testing, and rescue procedures.`,
+    `Analyze confined space hazards:\nSteps: ${steps}\nHazards: ${hazards}${docNote}`
   );
 }
 
 async function agentTrafficControl(steps, hazards) {
+  const docNote = ragActive && ragChunks.length
+    ? `\n\nDocument context:\n${ragKeywordSearch('traffic control flagging work zone', 3).join('\n\n')}`
+    : '';
   return await callAPI(
-    `You are a traffic control and work zone safety specialist. Analyze all traffic-related hazards for this highway/road construction task. Provide specific traffic management plans, flagging procedures, and work zone setup requirements per MUTCD standards.`,
-    `Analyze traffic control hazards:\nSteps: ${steps}\nHazards: ${hazards}`
+    ragActive && ragChunks.length ? ragSystemPrompt('traffic control and work zone safety specialist') : `You are a traffic control specialist. Analyze traffic-related hazards and provide traffic management plans per MUTCD standards.`,
+    `Analyze traffic control hazards:\nSteps: ${steps}\nHazards: ${hazards}${docNote}`
   );
 }
 
 async function agentChemicalHazards(steps, hazards) {
+  const docNote = ragActive && ragChunks.length
+    ? `\n\nDocument context:\n${ragKeywordSearch('chemical sealant adhesive VOC exposure', 3).join('\n\n')}`
+    : '';
   return await callAPI(
-    `You are a chemical safety specialist with expertise in construction materials. Analyze all chemical hazards including sealants, adhesives, paints, and compounds. Provide specific SDS requirements, exposure limits, ventilation needs, and chemical-specific PPE.`,
-    `Analyze chemical hazards:\nSteps: ${steps}\nHazards: ${hazards}`
+    ragActive && ragChunks.length ? ragSystemPrompt('chemical safety specialist') : `You are a chemical safety specialist. Analyze chemical hazards including SDS requirements, exposure limits, ventilation needs, and PPE.`,
+    `Analyze chemical hazards:\nSteps: ${steps}\nHazards: ${hazards}${docNote}`
   );
 }
 
@@ -1527,6 +1595,52 @@ function ragReset() {
   if (tc) tc.style.display = 'none';
 }
 
+function skipSuggestions() {
+  showTaskCard();
+}
+
+async function suggestActivities() {
+  const container = document.getElementById('suggestedActivities');
+  const quickArea = document.getElementById('quickTasksArea');
+
+  container.innerHTML = '<div style="color:var(--text-muted);font-size:13px">⏳ Generating suggestions...</div>';
+  showTaskCard();
+
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) {
+    container.innerHTML = '<div style="color:#dc2626;font-size:13px">⚠️ Enter your API key above first.</div>';
+    return;
+  }
+
+  try {
+    const result = await callAPI(
+      `You are a highway construction safety expert. List the 8 most common highway pavement construction activities that require a Job Safety Analysis. Return ONLY a valid JSON array of short activity names (max 7 words each), no markdown, no explanation. Example: ["Asphalt crack sealing on highway","Pothole patching operations"]`,
+      `List common highway pavement JSA activities.`
+    );
+
+    const s = result.indexOf('['), e = result.lastIndexOf(']');
+    if (s === -1) throw new Error('no array');
+    const activities = JSON.parse(result.substring(s, e + 1));
+
+    // Show in ragStateD card
+    container.innerHTML =
+      '<div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Suggested activities:</div>' +
+      activities.map(a =>
+        `<button class="quick-btn" style="margin:2px 4px 4px 0" onclick="setTask('${a.replace(/'/g,"\\'")}')">📋 ${a}</button>`
+      ).join('');
+
+    // Replace quick-tasks in taskCard
+    if (quickArea) {
+      quickArea.innerHTML = `<span>Suggested:</span>` +
+        activities.map(a =>
+          `<button class="quick-btn" onclick="setTask('${a.replace(/'/g,"\\'")}')">📋 ${a}</button>`
+        ).join('');
+    }
+  } catch(e) {
+    container.innerHTML = '<div style="color:#dc2626;font-size:12px">⚠️ Could not generate. Type your task below.</div>';
+  }
+}
+
 // ── WIZARD (legacy - kept for compatibility) ──────────────
 function wizardShowStep(id) {}
 function showMainCards() { showTaskCard(); }
@@ -1657,7 +1771,66 @@ async function loadRAGFile(event) {
 
   ragShowState('ragStateC');
   showTaskCard();
+
+  // Extract activities from document headings
+  extractDocumentActivities(text);
+
   event.target.value = '';
+}
+
+function extractDocumentActivities(text) {
+  const listEl = document.getElementById('ragActivitiesList');
+  const quickArea = document.getElementById('quickTasksArea');
+  if (!listEl) return;
+
+  listEl.innerHTML = '<span style="color:var(--text-muted)">⏳ Extracting...</span>';
+
+  setTimeout(() => {
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 4 && l.length < 90);
+    const activities = [];
+    const seen = new Set();
+
+    lines.forEach(line => {
+      // Remove common PDF artifacts
+      const clean = line.replace(/^\d+\s*$/, '').replace(/^[•\-\*]\s*/, '').trim();
+      if (!clean || clean.length < 5) return;
+
+      const isActivity =
+        /^[A-Z][a-zA-Z\s\-&\/\(\)]{4,70}$/.test(clean) ||   // Title Case sentence
+        /^\d+[\.\)]\s+[A-Z][a-z]/.test(clean) ||              // Numbered list
+        /^(Chapter|Section|Part|Step|Phase|Task|Procedure|Operation|Activity|Process)\s+\d*/i.test(clean) ||
+        (/^[A-Z\s]{5,50}$/.test(clean) && clean === clean.toUpperCase() && clean.split(' ').length <= 6); // ALL CAPS headings
+
+      if (isActivity) {
+        const key = clean.toLowerCase().replace(/\s+/g,' ');
+        // Skip very generic or too long
+        if (!seen.has(key) && clean.split(' ').length <= 8) {
+          seen.add(key);
+          activities.push(clean);
+        }
+      }
+    });
+
+    const top = activities.slice(0, 10);
+
+    if (top.length === 0) {
+      listEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px">Could not auto-detect activities — type your task below.</span>';
+      return;
+    }
+
+    // Show buttons in ragStateC
+    listEl.innerHTML = top.map(a =>
+      `<button class="quick-btn" style="margin:2px 4px 2px 0" onclick="setTask('${a.replace(/'/g,"\\'")}')">📋 ${a}</button>`
+    ).join('');
+
+    // Replace quick-tasks in taskCard with document activities
+    if (quickArea) {
+      quickArea.innerHTML = `<span>From document:</span>` +
+        top.map(a =>
+          `<button class="quick-btn" onclick="setTask('${a.replace(/'/g,"\\'")}')">📋 ${a}</button>`
+        ).join('');
+    }
+  }, 200);
 }
 
 function extractPDFText(bytes) {
@@ -1945,6 +2118,16 @@ async function runJSA() {
     renderSummary(report);
     renderOSHA(oshaEvidence);
     document.getElementById('rawOutput').textContent = fullRawOutput;
+
+    // Show document source in report header
+    const reportHeader = document.querySelector('#reportSection .report-header h2');
+    if (reportHeader) {
+      const srcBadge = ragActive && ragFileName
+        ? `<span style="font-size:11px;font-weight:500;background:#dcfce7;color:#16a34a;padding:3px 8px;border-radius:20px;margin-left:10px">📚 ${ragFileName}</span>`
+        : `<span style="font-size:11px;font-weight:400;color:var(--text-muted);margin-left:8px">General AI knowledge</span>`;
+      reportHeader.innerHTML = `📋 JSA Report ${srcBadge}`;
+    }
+
     document.getElementById('reportSection').style.display = 'block';
     document.getElementById('reportSection').scrollIntoView({behavior:'smooth'});
 
