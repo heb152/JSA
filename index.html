@@ -1783,54 +1783,69 @@ function extractDocumentActivities(text) {
   const quickArea = document.getElementById('quickTasksArea');
   if (!listEl) return;
 
-  listEl.innerHTML = '<span style="color:var(--text-muted)">⏳ Extracting...</span>';
+  listEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px">⏳ Extracting activities from document...</span>';
 
-  setTimeout(() => {
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 4 && l.length < 90);
-    const activities = [];
-    const seen = new Set();
+  // Wait a moment for API key to be available, then extract
+  setTimeout(async () => {
+    const apiKey = document.getElementById('apiKey').value.trim();
 
-    lines.forEach(line => {
-      // Remove common PDF artifacts
-      const clean = line.replace(/^\d+\s*$/, '').replace(/^[•\-\*]\s*/, '').trim();
-      if (!clean || clean.length < 5) return;
-
-      const isActivity =
-        /^[A-Z][a-zA-Z\s\-&\/\(\)]{4,70}$/.test(clean) ||   // Title Case sentence
-        /^\d+[\.\)]\s+[A-Z][a-z]/.test(clean) ||              // Numbered list
-        /^(Chapter|Section|Part|Step|Phase|Task|Procedure|Operation|Activity|Process)\s+\d*/i.test(clean) ||
-        (/^[A-Z\s]{5,50}$/.test(clean) && clean === clean.toUpperCase() && clean.split(' ').length <= 6); // ALL CAPS headings
-
-      if (isActivity) {
-        const key = clean.toLowerCase().replace(/\s+/g,' ');
-        // Skip very generic or too long
-        if (!seen.has(key) && clean.split(' ').length <= 8) {
-          seen.add(key);
-          activities.push(clean);
+    if (!apiKey) {
+      // No API key yet — show message and add listener to retry when key is entered
+      listEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px">⌛ Enter your API key above to extract activities from this document.</span>';
+      // Watch for API key input
+      const keyInput = document.getElementById('apiKey');
+      const onKeyEntered = async () => {
+        if (keyInput.value.trim().length > 10) {
+          keyInput.removeEventListener('input', onKeyEntered);
+          await doExtractActivities(text, listEl, quickArea);
         }
-      }
-    });
-
-    const top = activities.slice(0, 10);
-
-    if (top.length === 0) {
-      listEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px">Could not auto-detect activities — type your task below.</span>';
+      };
+      keyInput.addEventListener('input', onKeyEntered);
       return;
     }
 
-    // Show buttons in ragStateC
-    listEl.innerHTML = top.map(a =>
-      `<button class="quick-btn" style="margin:2px 4px 2px 0" onclick="setTask('${a.replace(/'/g,"\\'")}')">📋 ${a}</button>`
-    ).join('');
+    await doExtractActivities(text, listEl, quickArea);
+  }, 500);
+}
 
-    // Replace quick-tasks in taskCard with document activities
+async function doExtractActivities(text, listEl, quickArea) {
+  listEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px">⏳ Extracting activities from document...</span>';
+
+  try {
+    // Use first 6 chunks (most likely table of contents / intro)
+    const sample = ragChunks.slice(0, 6).join('\n\n');
+
+    const result = await callAPI(
+      `You are a construction safety expert. Extract a list of specific construction activities or operations described in this document. These should be tasks that could be analyzed in a Job Safety Analysis (JSA).
+Return ONLY a valid JSON array of short activity names (max 8 words each). No markdown, no explanation.
+Example: ["Excavation and trenching operations","Machine transport on public road"]`,
+      `Document excerpt:\n${sample}`
+    );
+
+    const s = result.indexOf('[');
+    const e = result.lastIndexOf(']');
+    if (s === -1) throw new Error('no array');
+    const activities = JSON.parse(result.substring(s, e + 1));
+
+    if (!activities || activities.length === 0) throw new Error('empty');
+
+    // Show in ragStateC
+    listEl.innerHTML =
+      activities.map(a =>
+        `<button class="quick-btn" style="margin:2px 4px 4px 0" onclick="setTask('${a.replace(/'/g,"\\'")}')">📋 ${a}</button>`
+      ).join('');
+
+    // Replace quick-tasks in taskCard
     if (quickArea) {
       quickArea.innerHTML = `<span>From document:</span>` +
-        top.map(a =>
+        activities.map(a =>
           `<button class="quick-btn" onclick="setTask('${a.replace(/'/g,"\\'")}')">📋 ${a}</button>`
         ).join('');
     }
-  }, 200);
+
+  } catch(err) {
+    listEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px">Could not extract activities — type your task below.</span>';
+  }
 }
 
 function extractPDFText(bytes) {
