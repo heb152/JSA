@@ -292,10 +292,16 @@ textarea:focus { border-color: var(--pitt-blue); }
   background: rgba(0,53,148,0.05);
 }
 
-/* ── RUN BUTTON ── */
-.run-btn {
+/* ── RUN ROW ── */
+.run-row {
   margin-top: 18px;
-  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.run-btn {
+  flex: 1;
   background: var(--pitt-blue);
   color: white;
   border: none;
@@ -313,6 +319,28 @@ textarea:focus { border-color: var(--pitt-blue); }
 }
 .run-btn:hover { background: var(--pitt-blue-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,53,148,0.2); }
 .run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.import-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.import-btn:hover {
+  border-color: var(--pitt-blue);
+  color: var(--pitt-blue);
+  background: rgba(0,53,148,0.04);
+}
 
 /* ── PROGRESS ── */
 .progress-section {
@@ -361,6 +389,20 @@ textarea:focus { border-color: var(--pitt-blue); }
 .agent-status { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 .agent-card.active .agent-status { color: var(--warning); }
 .agent-card.done .agent-status { color: var(--success); }
+
+.dynamic-plan-badge {
+  display: none;
+  background: rgba(0,53,148,0.06);
+  border: 1px solid rgba(0,53,148,0.2);
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: var(--pitt-blue);
+  gap: 6px;
+  align-items: center;
+}
+.dynamic-plan-badge strong { font-weight: 700; }
 
 .feedback-badge {
   display: none;
@@ -540,6 +582,257 @@ footer {
 }
 footer strong { color: var(--pitt-blue); }
 
+/* ── WIZARD ── */
+.wizard-card { padding: 20px; }
+.wizard-step { }
+.wizard-q {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.wizard-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.wizard-btn {
+  padding: 11px 20px;
+  border-radius: 9px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text);
+}
+.wizard-btn-yes {
+  background: var(--pitt-blue);
+  color: white;
+  border-color: var(--pitt-blue);
+}
+.wizard-btn-yes:hover { background: var(--pitt-blue-light); }
+.wizard-btn-no:hover { border-color: var(--pitt-blue); color: var(--pitt-blue); background: rgba(0,53,148,0.04); }
+.wizard-back {
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-bottom: 14px;
+  display: inline-block;
+}
+.wizard-back:hover { color: var(--pitt-blue); }
+.wizard-activities {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wizard-activity-btn {
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  color: var(--text);
+}
+.wizard-activity-btn:hover { border-color: var(--pitt-blue); color: var(--pitt-blue); background: rgba(0,53,148,0.04); }
+.wizard-done { display: flex; align-items: center; justify-content: space-between; }
+.wizard-done-text { font-size: 14px; font-weight: 600; color: #16a34a; }
+.wizard-reset { background: none; border: none; font-size: 12px; color: var(--text-muted); cursor: pointer; font-family: 'Inter', sans-serif; }
+.wizard-reset:hover { color: var(--pitt-blue); }
+
+/* ── RAG CARD ── */
+.rag-card { padding: 0; overflow: hidden; }
+
+.rag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.rag-header:hover { background: rgba(0,53,148,0.03); }
+
+.rag-title { display: flex; flex-direction: column; gap: 3px; }
+.rag-title span:first-child { font-size: 14px; font-weight: 700; color: var(--text); }
+.rag-subtitle { font-size: 12px; color: var(--text-muted); }
+
+.rag-toggle { display: flex; align-items: center; gap: 8px; }
+.toggle-track {
+  width: 40px; height: 22px;
+  background: var(--border);
+  border-radius: 11px;
+  position: relative;
+  transition: background 0.2s;
+}
+.toggle-track.on { background: var(--pitt-blue); }
+.toggle-thumb {
+  width: 18px; height: 18px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px; left: 2px;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-track.on .toggle-thumb { left: 20px; }
+.toggle-label { font-size: 12px; font-weight: 600; color: var(--text-muted); min-width: 24px; }
+.toggle-track.on + .toggle-label { color: var(--pitt-blue); }
+
+.rag-body {
+  display: none;
+  padding: 0 20px 20px;
+  border-top: 1px solid var(--border);
+}
+.rag-body.open { display: block; }
+
+.rag-upload {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 16px;
+}
+.rag-upload:hover { border-color: var(--pitt-blue); background: rgba(0,53,148,0.03); }
+.rag-upload-icon { font-size: 28px; margin-bottom: 8px; }
+.rag-upload-text { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.rag-upload-hint { font-size: 12px; color: var(--text-muted); }
+
+.rag-loaded { display: none; margin-top: 16px; }
+.rag-loaded.show { display: block; }
+
+.rag-file-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0,53,148,0.05);
+  border: 1px solid rgba(0,53,148,0.15);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+}
+.rag-file-icon { font-size: 20px; }
+.rag-file-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.rag-file-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.rag-remove-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+}
+.rag-remove-btn:hover { color: #dc2626; background: #fee2e2; }
+
+.rag-mode-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.rag-mode-label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.rag-radio { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: var(--text); }
+.rag-radio em { color: var(--text-muted); font-style: normal; font-size: 11px; }
+
+.rag-test-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.rag-test-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+}
+.rag-test-input:focus { border-color: var(--pitt-blue); }
+.rag-test-btn {
+  padding: 10px 18px;
+  background: var(--pitt-blue);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.rag-test-btn:hover { background: var(--pitt-blue-light); }
+.rag-test-answer {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+  display: none;
+  white-space: pre-wrap;
+}
+.rag-test-answer.show { display: block; }
+
+/* ── RISK LEGEND ── */
+.legend-section {
+  margin-top: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.legend-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--pitt-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 14px;
+}
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 700px) { .legend-grid { grid-template-columns: 1fr; } }
+.legend-col-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.legend-rows { display: flex; flex-direction: column; gap: 6px; }
+.legend-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.legend-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.legend-label { font-weight: 600; color: var(--text); flex-shrink: 0; }
+.legend-desc { color: var(--text-muted); font-size: 11px; }
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--surface); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -561,10 +854,9 @@ footer strong { color: var(--pitt-blue); }
 
 <div class="container">
 
-  <!-- PROVIDER & MODEL -->
+  <!-- 1. PROVIDER & MODEL — always first -->
   <div class="card">
     <div class="card-title">AI Provider & Model</div>
-
     <div class="provider-grid">
       <div class="provider-btn selected" onclick="selectProvider('groq')">
         <div class="provider-icon">⚡</div>
@@ -587,12 +879,10 @@ footer strong { color: var(--pitt-blue); }
         <div class="provider-tag paid">Paid</div>
       </div>
     </div>
-
     <div class="model-row">
       <label>Model:</label>
       <select id="modelSelect"></select>
     </div>
-
     <div class="api-row">
       <label>🔑 API Key:</label>
       <input type="password" id="apiKey" placeholder="Paste your API key here..." />
@@ -603,26 +893,71 @@ footer strong { color: var(--pitt-blue); }
     </div>
   </div>
 
-  <!-- TASK INPUT -->
-  <div class="card">
-    <div class="card-title">Construction Task</div>
-    <textarea id="taskInput" placeholder="Describe the construction task — e.g. Tunnel lining and support system installation"></textarea>
+  <!-- 2. USER GUIDE QUESTION -->
+  <div class="card" id="ragCard">
+    <div class="card-title" style="margin-bottom:14px">📚 User Guide</div>
 
-    <div class="quick-tasks">
-      <span>Quick select:</span>
-      <button class="quick-btn" onclick="setTask('Tunnel lining and support system installation')">Tunnel Lining</button>
-      <button class="quick-btn" onclick="setTask('Scaffolding erection and dismantling')">Scaffolding</button>
-      <button class="quick-btn" onclick="setTask('Concrete pouring for high-rise foundation')">Concrete Pouring</button>
-      <button class="quick-btn" onclick="setTask('Electrical wiring installation in commercial building')">Electrical Wiring</button>
-      <button class="quick-btn" onclick="setTask('Steel structural frame erection')">Steel Erection</button>
-      <button class="quick-btn" onclick="setTask('Excavation and trenching for underground utilities')">Excavation</button>
+    <!-- State A: Ask yes/no -->
+    <div id="ragStateA">
+      <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:14px">Do you have an equipment manual or safety guide?</div>
+      <div style="display:flex;gap:10px">
+        <button class="wizard-btn wizard-btn-yes" onclick="ragYes()">✅ Yes, I have a guide</button>
+        <button class="wizard-btn wizard-btn-no" onclick="ragNo()">➡️ No, continue without</button>
+      </div>
     </div>
 
+    <!-- State B: Upload -->
+    <div id="ragStateB" style="display:none">
+      <div class="rag-upload" id="ragUploadArea" onclick="document.getElementById('ragFileInput').click()">
+        <div class="rag-upload-icon">📄</div>
+        <div class="rag-upload-text">Click to upload PDF or TXT</div>
+        <div class="rag-upload-hint">Equipment manuals, OSHA guides, safety procedures...</div>
+        <input type="file" id="ragFileInput" accept=".pdf,.txt" style="display:none" onchange="loadRAGFile(event)">
+      </div>
+      <button class="wizard-reset" style="margin-top:10px" onclick="ragReset()">← Back</button>
+    </div>
 
+    <!-- State C: File loaded -->
+    <div id="ragStateC" style="display:none">
+      <div class="rag-file-info">
+        <span class="rag-file-icon">✅</span>
+        <div>
+          <div class="rag-file-name" id="ragFileName">—</div>
+          <div class="rag-file-meta" id="ragFileMeta">—</div>
+        </div>
+        <button class="rag-remove-btn" onclick="ragReset()">✕ Remove</button>
+      </div>
+      <div style="margin-top:10px;padding:10px 14px;background:rgba(0,53,148,0.05);border-radius:8px;font-size:12px;color:var(--pitt-blue)">
+        ℹ️ JSA will be generated <strong>based on this document only</strong>.
+      </div>
+    </div>
 
-    <button class="run-btn" id="runBtn" onclick="runJSA()">
-      ▶ Run Job Safety Analysis
-    </button>
+    <!-- State D: Skipped -->
+    <div id="ragStateD" style="display:none">
+      <div style="font-size:13px;color:var(--text-muted)">No guide — JSA will use general AI knowledge.</div>
+      <button class="wizard-reset" style="margin-top:8px" onclick="ragReset()">← Change</button>
+    </div>
+  </div>
+
+  <!-- 3. CONSTRUCTION TASK — hidden until guide question answered -->
+  <div class="card" id="taskCard" style="display:none">
+    <div class="card-title">Construction Task</div>
+    <textarea id="taskInput" placeholder="Describe the construction task — e.g. Tunnel lining and support system installation"></textarea>
+    <div class="quick-tasks">
+      <span>Quick select:</span>
+      <button class="quick-btn" onclick="setTask('Pavement crack sealing with cold-pour sealant on highway')">🟢 Crack Sealing</button>
+      <button class="quick-btn" onclick="setTask('Concrete pavement joint sealing and repair on highway')">🟢 Joint Sealing</button>
+      <button class="quick-btn" onclick="setTask('Pothole patching and surface repair on highway')">🟡 Pothole Patching</button>
+      <button class="quick-btn" onclick="setTask('Asphalt pavement milling and resurfacing on urban road')">🟡 Milling & Resurfacing</button>
+      <button class="quick-btn" onclick="setTask('Highway pavement marking and line striping operations')">🟡 Line Striping</button>
+      <button class="quick-btn" onclick="setTask('Full-depth asphalt pavement reconstruction on highway')">🔴 Full Reconstruction</button>
+    </div>
+    <div class="run-row">
+      <button class="run-btn" id="runBtn" onclick="runJSA()">▶ Run Job Safety Analysis</button>
+      <label class="import-btn">⬆ Import Previous Report
+        <input type="file" accept=".txt" style="display:none" onchange="importTXT(event)">
+      </label>
+    </div>
   </div>
 
   <!-- ERROR -->
@@ -631,49 +966,9 @@ footer strong { color: var(--pitt-blue); }
   <!-- PROGRESS -->
   <div class="progress-section" id="progressSection">
     <div class="card-title">Agent Progress</div>
-    <div class="agents-grid">
-      <div class="agent-card" id="agent-1">
-        <div class="agent-dot"></div>
-        <div>
-          <div class="agent-name">Project Manager</div>
-          <div class="agent-status">Waiting...</div>
-        </div>
-      </div>
-      <div class="agent-card" id="agent-2">
-        <div class="agent-dot"></div>
-        <div>
-          <div class="agent-name">Risk Identifier</div>
-          <div class="agent-status">Waiting...</div>
-        </div>
-      </div>
-      <div class="agent-card" id="agent-3">
-        <div class="agent-dot"></div>
-        <div>
-          <div class="agent-name">Risk Assessor</div>
-          <div class="agent-status">Waiting...</div>
-        </div>
-      </div>
-      <div class="agent-card" id="agent-4">
-        <div class="agent-dot"></div>
-        <div>
-          <div class="agent-name">Risk Manager</div>
-          <div class="agent-status">Waiting...</div>
-        </div>
-      </div>
-      <div class="agent-card" id="agent-5">
-        <div class="agent-dot"></div>
-        <div>
-          <div class="agent-name">Safety Manager</div>
-          <div class="agent-status">Waiting...</div>
-        </div>
-      </div>
-      <div class="agent-card" id="agent-6">
-        <div class="agent-dot"></div>
-        <div>
-          <div class="agent-name">Reporter</div>
-          <div class="agent-status">Waiting...</div>
-        </div>
-      </div>
+    <div class="dynamic-plan-badge" id="dynamicPlanBadge"></div>
+    <div class="agents-grid" id="agentsGrid">
+      <!-- Dynamic agent cards rendered by JS -->
     </div>
     <div class="feedback-badge" id="feedbackBadge">
       🔄 Feedback loop triggered — Risk Assessor is revising assessments...
@@ -700,12 +995,52 @@ footer strong { color: var(--pitt-blue); }
       <div class="table-wrapper">
         <table>
           <thead>
-            <tr>
-              <th>Job Step</th><th>Hazard</th><th>Likelihood</th><th>Impact</th><th>Preventive Measures</th>
+            <tr id="tableHeader">
+              <th>Job Step</th><th>Hazard</th><th>Likelihood</th><th>Impact</th><th>OSHA Evidence</th><th>Preventive Measures</th>
             </tr>
           </thead>
           <tbody id="reportTableBody"></tbody>
         </table>
+      </div>
+
+      <!-- RISK LEGEND -->
+      <div class="legend-section">
+        <div class="legend-title">📖 Risk Scale Reference</div>
+        <div class="legend-grid">
+          <div class="legend-col">
+            <div class="legend-col-title">🎲 Likelihood (P)</div>
+            <div class="legend-rows">
+              <div class="legend-row"><span class="legend-badge badge-p">P1</span><span class="legend-label">Unforeseen</span><span class="legend-desc">&lt;1% chance</span></div>
+              <div class="legend-row"><span class="legend-badge badge-p">P2</span><span class="legend-label">Rare</span><span class="legend-desc">1–5%</span></div>
+              <div class="legend-row"><span class="legend-badge badge-p">P3</span><span class="legend-label">Unlikely</span><span class="legend-desc">5–25%</span></div>
+              <div class="legend-row"><span class="legend-badge badge-p legend-highlight">P4</span><span class="legend-label">Possible</span><span class="legend-desc">25–50% ⚠️</span></div>
+              <div class="legend-row"><span class="legend-badge badge-p legend-highlight">P5</span><span class="legend-label">Likely</span><span class="legend-desc">50–75% ⚠️</span></div>
+              <div class="legend-row"><span class="legend-badge badge-p legend-highlight">P6</span><span class="legend-label">Almost Certain</span><span class="legend-desc">&gt;75% 🔴</span></div>
+            </div>
+          </div>
+          <div class="legend-col">
+            <div class="legend-col-title">💥 Impact (C)</div>
+            <div class="legend-rows">
+              <div class="legend-row"><span class="legend-badge badge-c-low">C1</span><span class="legend-label">Insignificant</span><span class="legend-desc">Near miss, recovery in hours</span></div>
+              <div class="legend-row"><span class="legend-badge badge-c-low">C2</span><span class="legend-label">Minor</span><span class="legend-desc">Minor injury, &lt;6 days recovery</span></div>
+              <div class="legend-row"><span class="legend-badge badge-c-mid">C3</span><span class="legend-label">Moderate</span><span class="legend-desc">Lost workday, &gt;6 days recovery</span></div>
+              <div class="legend-row"><span class="legend-badge badge-c-mid">C4</span><span class="legend-label">Significant</span><span class="legend-desc">Hospitalization, long-term effects</span></div>
+              <div class="legend-row"><span class="legend-badge badge-c-high">C5</span><span class="legend-label">Major</span><span class="legend-desc">1 fatality or permanent disability</span></div>
+              <div class="legend-row"><span class="legend-badge badge-c-high">C6</span><span class="legend-label">Catastrophic</span><span class="legend-desc">Multiple fatalities 💀</span></div>
+            </div>
+          </div>
+          <div class="legend-col">
+            <div class="legend-col-title">🎯 Risk Priority</div>
+            <div class="legend-rows">
+              <div class="legend-row"><span class="legend-badge badge-c-low">Low</span><span class="legend-label">P1-P2 + C1-C2</span><span class="legend-desc">Monitor only</span></div>
+              <div class="legend-row"><span class="legend-badge badge-c-mid">Medium</span><span class="legend-label">P3C3 — P4C3</span><span class="legend-desc">Action required</span></div>
+              <div class="legend-row"><span class="legend-badge badge-c-high">High</span><span class="legend-label">P4C4 and above</span><span class="legend-desc">Immediate action 🔴</span></div>
+              <div class="legend-row" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+                <span style="font-size:11px;color:var(--text-muted)">💡 Higher P + Higher C = More dangerous<br>This report only shows P3C3 and above</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="tab-content" id="tab-osha">
@@ -898,16 +1233,28 @@ async function callAPI(systemPrompt, userMessage) {
 
 // ── AGENTS ───────────────────────────────────────────────
 async function agentProjectManager(job) {
+  if (ragActive && ragChunks.length) {
+    const ctx = ragKeywordSearch(job, 3).join('\n\n');
+    const docNote = ctx ? `\n\nReference document context:\n${ctx}\n\nBase your step breakdown on this document where relevant.` : '';
+    return await callAPI(
+      `You are a project manager. Break down the construction task into clear implementation steps based on the provided document. Format as a numbered list.`,
+      `Task: ${job}${docNote}`
+    );
+  }
   return await callAPI(
     `You are a highly skilled project manager with expertise in construction projects. Break down the given construction task into clear, detailed implementation steps focusing on the execution phase. Format as a numbered list.`,
     `Break down this construction task into steps: ${job}`
   );
 }
-async function agentRiskIdentifier(steps) {
-  return await callAPI(
-    `You are an expert construction safety inspector. Identify all potential hazards for each step. Be specific and thorough.`,
-    `Identify hazards for each step:\n${steps}`
-  );
+async function agentRiskIdentifier(steps, ragContext='') {
+  const useDoc = ragActive && ragContext && ragContext.length > 50;
+  const sysPrompt = useDoc
+    ? `You are an expert construction safety inspector. Identify all potential hazards for each step based ONLY on the provided reference document. Do not use general knowledge — only reference what is stated in the document.`
+    : `You are an expert construction safety inspector. Identify all potential hazards for each step. Be specific and thorough.`;
+  const docNote = useDoc
+    ? `\n\nIMPORTANT — Base your analysis ONLY on this document:\n${ragContext}`
+    : '';
+  return await callAPI(sysPrompt, `Identify hazards for each step:\n${steps}${docNote}`);
 }
 
 // ── OSHA MATCHER ─────────────────────────────────────────
@@ -976,14 +1323,478 @@ async function agentSafetyManager(assessments) {
   );
 }
 async function agentReporter(job, steps, hazards, assessments, controls, oshaEvidence) {
+  const oshaNote = oshaEvidence && !oshaEvidence.includes('No') ?
+    `\n\nOSHA Real Incidents — include inline in table next to matching hazards as "⚠️ OSHA [year]: [brief]":\n${oshaEvidence}` : '';
   return await callAPI(
-    `You are a technical report writer for construction safety. Compile a JSA report with:
-1. A table — format rows as: STEP | HAZARD | P# | C# | MEASURES (pipe-delimited)
-2. Sections: ### Findings, ### Recommendations, ### Conclusion, ### Next Steps
-Only include moderate and high-risk hazards.
-${oshaEvidence ? 'Reference relevant OSHA incidents in the Findings section.' : ''}`,
-    `JSA for: ${job}\nSteps: ${steps}\nHazards: ${hazards}\nAssessments: ${assessments}\nControls: ${controls}${oshaEvidence?'\nOSHA Evidence:\n'+oshaEvidence:''}`
+    `You are a professional construction safety report writer. Compile a clear, structured JSA report.
+
+FORMAT REQUIREMENTS:
+1. Risk Table — pipe-delimited rows:
+   STEP | HAZARD | P# | C# | OSHA EVIDENCE | PREVENTIVE MEASURES
+   - OSHA EVIDENCE: match real incident if available (e.g. "⚠️ 2007: Worker fatal fall"), else write "—"
+   - Only include P3C3 and above
+
+2. ### Key Statistics
+   - Total hazards: X | Critical (C5-C6): X | Significant (C3-C4): X | Agents used: X
+
+3. ### Findings
+   2-3 sentences summarizing main risks found
+
+4. ### Top 3 Critical Hazards
+   Numbered list of 3 most dangerous hazards and why
+
+5. ### Recommendations
+   Numbered list, max 5 practical items
+
+6. ### Conclusion
+   2-3 sentences
+
+7. ### Next Steps
+   Numbered list, max 4 items`,
+    `JSA for: ${job}\nSteps: ${steps}\nHazards: ${hazards}\nAssessments: ${assessments}\nControls: ${controls}${oshaNote}`
   );
+}
+
+// ── OPTIONAL AGENTS ──────────────────────────────────────
+async function agentEquipmentSpecialist(steps, hazards) {
+  return await callAPI(
+    `You are a heavy equipment safety specialist. Analyze the hazards specifically related to heavy machinery, vehicles, and mechanical equipment. For each equipment-related hazard provide additional specialized safety protocols and equipment-specific PPE requirements.`,
+    `Analyze equipment-related hazards:\nSteps: ${steps}\nHazards: ${hazards}`
+  );
+}
+
+async function agentConfinedSpace(steps, hazards) {
+  return await callAPI(
+    `You are a confined space entry specialist with expertise in OSHA 29 CFR 1926.1200. Identify all confined space hazards (tunnels, trenches, underground areas) and provide specific entry permits, atmospheric testing requirements, and rescue procedures.`,
+    `Analyze confined space hazards:\nSteps: ${steps}\nHazards: ${hazards}`
+  );
+}
+
+async function agentTrafficControl(steps, hazards) {
+  return await callAPI(
+    `You are a traffic control and work zone safety specialist. Analyze all traffic-related hazards for this highway/road construction task. Provide specific traffic management plans, flagging procedures, and work zone setup requirements per MUTCD standards.`,
+    `Analyze traffic control hazards:\nSteps: ${steps}\nHazards: ${hazards}`
+  );
+}
+
+async function agentChemicalHazards(steps, hazards) {
+  return await callAPI(
+    `You are a chemical safety specialist with expertise in construction materials. Analyze all chemical hazards including sealants, adhesives, paints, and compounds. Provide specific SDS requirements, exposure limits, ventilation needs, and chemical-specific PPE.`,
+    `Analyze chemical hazards:\nSteps: ${steps}\nHazards: ${hazards}`
+  );
+}
+
+// ── TASK ANALYZER (Agent 0) ───────────────────────────────
+async function agentTaskAnalyzer(task) {
+  const result = await callAPI(
+    `You are a construction safety planning expert. Analyze the given construction task and determine which specialist agents are needed beyond the standard 6-agent JSA workflow.
+
+Standard agents (always included):
+- project_manager, risk_identifier, osha_matcher, risk_assessor, risk_manager, safety_manager, reporter
+
+Optional specialist agents:
+- "equipment_specialist": needed when task involves heavy machinery (cranes, excavators, rollers, pavers, milling machines, compactors)
+- "confined_space": needed when task involves tunnels, trenches deeper than 4ft, underground work, manholes
+- "traffic_control": needed when task involves highway work, road closures, flagging, work zones, traffic management
+- "chemical_hazards": needed when task involves sealants, epoxies, paints, primers, chemical stabilizers, VOCs
+
+Respond ONLY with valid JSON, no other text:
+{
+  "complexity": "simple|medium|complex",
+  "optional_agents": ["agent_name1", "agent_name2"],
+  "total_agents": <number>,
+  "reason": "<brief explanation>"
+}`,
+    `Analyze this construction task: ${task}`
+  );
+
+  try {
+    // Safe JSON extraction - find first { and last }
+    const jsonStart = result.indexOf('{');
+    const jsonEnd = result.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON found');
+    const clean = result.substring(jsonStart, jsonEnd + 1);
+    return JSON.parse(clean);
+  } catch(e) {
+    return { complexity:'medium', optional_agents:[], total_agents:6, reason:'Default workflow' };
+  }
+}
+
+// ── DYNAMIC AGENT CARDS RENDERER ─────────────────────────
+function renderDynamicAgents(plan) {
+  const grid = document.getElementById('agentsGrid');
+  const base = [
+    { id:'pm', name:'Project Manager', icon:'🔵' },
+    { id:'ri', name:'Risk Identifier', icon:'🟡' },
+    { id:'om', name:'OSHA Matcher', icon:'🔶' },
+    { id:'ra', name:'Risk Assessor', icon:'🟠' },
+    { id:'rm', name:'Risk Manager', icon:'🔴' },
+  ];
+  const optional = {
+    equipment_specialist: { id:'eq', name:'Equipment Specialist', icon:'⚙️' },
+    confined_space:       { id:'cs', name:'Confined Space', icon:'🕳️' },
+    traffic_control:      { id:'tc', name:'Traffic Control', icon:'🚦' },
+    chemical_hazards:     { id:'ch', name:'Chemical Hazards', icon:'⚗️' },
+  };
+  const end = [
+    { id:'sm', name:'Safety Manager', icon:'🟢' },
+    { id:'rp', name:'Reporter', icon:'🟣' },
+  ];
+
+  const allAgents = [...base];
+  (plan.optional_agents||[]).forEach(name => {
+    if (optional[name]) allAgents.push(optional[name]);
+  });
+  allAgents.push(...end);
+
+  grid.innerHTML = allAgents.map((a,i) => `
+    <div class="agent-card" id="agent-card-${a.id}">
+      <div class="agent-dot"></div>
+      <div>
+        <div class="agent-name">${a.icon} ${a.name}</div>
+        <div class="agent-status">Waiting...</div>
+      </div>
+    </div>`).join('');
+
+  // Show plan badge
+  const badge = document.getElementById('dynamicPlanBadge');
+  badge.style.display = 'flex';
+  badge.style.flexDirection = 'column';
+  badge.style.gap = '6px';
+  const ragBadge = (typeof ragActive !== 'undefined' && ragActive && typeof ragFileName !== 'undefined' && ragFileName)
+    ? `<span style="font-size:11px;color:#16a34a;font-weight:600">📚 Using document: ${ragFileName}</span>`
+    : `<span style="font-size:11px;color:var(--text-muted)">📖 Using general AI knowledge</span>`;
+  // Sanitize reason to avoid regex/HTML issues
+  const safeReason = String(plan.reason || '').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*/g,'').substring(0, 120);
+  badge.innerHTML = `<span>🧠 Dynamic Plan: <strong>${plan.total_agents} agents</strong> · ${plan.complexity} complexity · ${safeReason}</span>${ragBadge}`;
+
+  return allAgents;
+}
+
+function setDynamicAgent(id, status) {
+  const card = document.getElementById('agent-card-' + id);
+  if (!card) return;
+  card.classList.remove('active','done');
+  const st = card.querySelector('.agent-status');
+  if (status==='active') { card.classList.add('active'); st.textContent='Running...'; }
+  else if (status==='done') { card.classList.add('done'); st.textContent='Done ✓'; }
+  else { st.textContent='Waiting...'; }
+}
+
+async function sleepDynamic(ms, nextId) {
+  const card = document.getElementById('agent-card-' + nextId);
+  const st = card ? card.querySelector('.agent-status') : null;
+  const secs = Math.ceil(ms/1000);
+  for (let i=secs; i>0; i--) {
+    if (st) st.textContent = `Starting in ${i}s...`;
+    await sleep(1000);
+  }
+  if (st) st.textContent = 'Waiting...';
+}
+
+// ── RAG STATE ────────────────────────────────────────────
+function ragShowState(id) {
+  ['ragStateA','ragStateB','ragStateC','ragStateD'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+  });
+}
+
+function showTaskCard() {
+  const tc = document.getElementById('taskCard');
+  if (tc) {
+    tc.style.display = 'block';
+    setTimeout(() => tc.scrollIntoView({behavior:'smooth', block:'start'}), 100);
+  }
+}
+
+function ragYes() {
+  ragShowState('ragStateB');
+}
+
+function ragNo() {
+  ragActive = false;
+  ragChunks = [];
+  ragShowState('ragStateD');
+  showTaskCard();
+}
+
+function ragReset() {
+  ragActive = false;
+  ragChunks = [];
+  ragFileName = '';
+  ragShowState('ragStateA');
+  const tc = document.getElementById('taskCard');
+  if (tc) tc.style.display = 'none';
+}
+
+// ── WIZARD (legacy - kept for compatibility) ──────────────
+function wizardShowStep(id) {}
+function showMainCards() { showTaskCard(); }
+function wizardGuide(h) {}
+function wizardStep3() {}
+function wizardNoGuide() {}
+function wizardBack(s) {}
+function wizardActivity(k) {}
+function wizardReset() { ragReset(); }
+function selectWizardActivity(a) {
+  document.getElementById('taskInput').value = a;
+}
+
+// ── RAG SYSTEM ───────────────────────────────────────────
+
+async function extractActivities() {
+  if (!ragChunks.length) { alert('No guide loaded.'); return; }
+  const container = document.getElementById('wizardActivities');
+  container.innerHTML = '<div style="color:var(--text-muted);font-size:13px">⏳ Searching document for activities...</div>';
+
+  // Use keyword search — no API needed
+  const keywords = ['excavation','operation','installation','maintenance','repair','paving','milling','sealing','grading','compaction','welding','drilling','lifting','demolition','pouring','resurfacing'];
+  const found = new Set();
+
+  ragChunks.forEach(chunk => {
+    const lower = chunk.toLowerCase();
+    keywords.forEach(kw => {
+      if (lower.includes(kw)) {
+        // Extract sentence containing keyword
+        const sentences = chunk.split(/[.!?\n]/);
+        sentences.forEach(s => {
+          if (s.toLowerCase().includes(kw) && s.trim().length > 20 && s.trim().length < 120) {
+            found.add(s.trim());
+          }
+        });
+      }
+    });
+  });
+
+  const activities = [...found].slice(0, 10);
+
+  if (activities.length === 0) {
+    // Fallback: try with API if key available
+    const apiKey = document.getElementById('apiKey').value.trim();
+    if (apiKey) {
+      const sampleText = ragChunks.slice(0, 6).join('\n\n');
+      try {
+        const result = await callAPI(
+          `Extract a list of specific construction activities from this document. Return ONLY a JSON array of short activity names (max 10 words each), no other text.`,
+          `Document:\n${sampleText}`
+        );
+        const jsonStart = result.indexOf('[');
+        const jsonEnd = result.lastIndexOf(']');
+        const clean = jsonStart !== -1 ? result.substring(jsonStart, jsonEnd + 1) : '[]';
+        const list = JSON.parse(clean);
+        container.innerHTML = list.map(a =>
+          `<button class="wizard-activity-btn" onclick="selectWizardActivity('${a.replace(/'/g,"\\'")}')">📋 ${a}</button>`
+        ).join('');
+        return;
+      } catch(e) {}
+    }
+    container.innerHTML = `
+      <div style="color:var(--text-muted);font-size:13px;margin-bottom:10px">No specific activities found automatically. Please type your task below:</div>
+      <button class="wizard-btn wizard-btn-yes" onclick="showMainCards();wizardShowStep('wDone');document.getElementById('wDoneText').textContent='✅ Ready — enter your task below'">Continue to task input →</button>`;
+    return;
+  }
+
+  container.innerHTML = '<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Select an activity from your guide:</div>' +
+    activities.map(a =>
+      `<button class="wizard-activity-btn" onclick="selectWizardActivity('${a.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">📋 ${a}</button>`
+    ).join('');
+}
+
+function selectWizardActivity(activity) {
+  document.getElementById('taskInput').value = activity;
+  document.getElementById('wDoneText').textContent =
+    `✅ Task set · ${ragActive ? 'Guide loaded' : 'No guide'} · Ready to run`;
+  wizardShowStep('wDone');
+  showMainCards();
+}
+
+function wizardReset() {
+  ragActive = false;
+  ragChunks = [];
+  ragFileName = '';
+  document.getElementById('ragLoaded').classList.remove('show');
+  document.getElementById('ragUploadArea').style.display = 'block';
+  document.getElementById('mainCards').style.display = 'none';
+  wizardShowStep('wStep1');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ── RAG SYSTEM ───────────────────────────────────────────
+let ragActive = false;
+let ragChunks = [];
+let ragFileName = '';
+
+function toggleRAG() {
+  ragActive = !ragActive;
+  const track = document.querySelector('.toggle-track');
+  const label = document.getElementById('ragToggleLabel');
+  const body = document.getElementById('ragBody');
+  track.classList.toggle('on', ragActive);
+  label.textContent = ragActive ? 'ON' : 'OFF';
+  body.classList.toggle('open', ragActive);
+}
+
+async function loadRAGFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  ragFileName = file.name;
+
+  let text = '';
+  if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+    const arrayBuffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    text = extractPDFText(bytes);
+  } else {
+    text = await file.text();
+  }
+
+  ragChunks = chunkText(text, 500);
+  ragActive = true;
+
+  document.getElementById('ragFileName').textContent = ragFileName;
+  document.getElementById('ragFileMeta').textContent =
+    `${ragChunks.length} chunks · ${text.split(' ').length.toLocaleString()} words extracted`;
+
+  ragShowState('ragStateC');
+  showTaskCard();
+  event.target.value = '';
+}
+
+function extractPDFText(bytes) {
+  // Simple PDF text extraction — look for text between BT/ET markers
+  let text = '';
+  const str = new TextDecoder('latin1').decode(bytes);
+  // Extract text streams
+  const matches = str.matchAll(/BT[\s\S]*?ET/g);
+  for (const match of matches) {
+    const block = match[0];
+    const textMatches = block.matchAll(/\(([^)]+)\)\s*Tj/g);
+    for (const t of textMatches) {
+      text += t[1] + ' ';
+    }
+    // Also try Td/TJ format
+    const tjMatches = block.matchAll(/\[([^\]]+)\]\s*TJ/g);
+    for (const t of tjMatches) {
+      const cleaned = t[1].replace(/\(([^)]*)\)/g, '$1').replace(/-?\d+/g, ' ');
+      text += cleaned + ' ';
+    }
+  }
+  // Fallback: extract any readable ASCII
+  if (text.length < 100) {
+    text = str.replace(/[^\x20-\x7E\n]/g, ' ').replace(/\s+/g, ' ');
+  }
+  return text;
+}
+
+function chunkText(text, wordsPerChunk) {
+  const words = text.split(/\s+/).filter(w => w.length > 0);
+  const chunks = [];
+  for (let i = 0; i < words.length; i += wordsPerChunk) {
+    const chunk = words.slice(i, i + wordsPerChunk).join(' ');
+    if (chunk.trim().length > 20) chunks.push(chunk);
+  }
+  return chunks;
+}
+
+function removeRAGFile() {
+  ragChunks = [];
+  ragFileName = '';
+  document.getElementById('ragUploadArea').style.display = 'block';
+  document.getElementById('ragLoaded').classList.remove('show');
+  document.getElementById('ragTestAnswer').classList.remove('show');
+  document.getElementById('ragTestAnswer').textContent = '';
+  document.getElementById('ragTestQ').value = '';
+}
+
+function ragKeywordSearch(query, topN = 5) {
+  const qWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+  const scored = ragChunks.map((chunk, i) => {
+    const lower = chunk.toLowerCase();
+    let score = 0;
+    qWords.forEach(w => {
+      // Use simple string includes — no regex, no crash
+      let pos = 0;
+      const clean = w.replace(/[^a-z0-9]/g, ''); // only alphanumeric
+      if (clean.length < 3) return;
+      while ((pos = lower.indexOf(clean, pos)) !== -1) {
+        score++;
+        pos += clean.length;
+      }
+    });
+    return { chunk, score, index: i };
+  });
+  return scored.sort((a, b) => b.score - a.score).slice(0, topN).filter(x => x.score > 0).map(x => x.chunk);
+}
+
+async function ragAPISearch(query, topN = 3) {
+  const candidates = ragKeywordSearch(query, 10);
+  if (!candidates.length) return [];
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) return candidates.slice(0, topN);
+
+  const result = await callAPI(
+    `You are a document search assistant. Given a question and document excerpts, select the ${topN} most relevant excerpts. Return ONLY the selected excerpts separated by "---", nothing else.`,
+    `Question: ${query}\n\nExcerpts:\n${candidates.map((c,i)=>`[${i+1}] ${c}`).join('\n\n')}`
+  );
+  return [result];
+}
+
+async function getRAGContext(query) {
+  if (!ragActive || ragChunks.length === 0) return '';
+  const mode = document.querySelector('input[name="ragMode"]:checked')?.value || 'keyword';
+  let relevant = [];
+  if (mode === 'api') {
+    relevant = await ragAPISearch(query, 3);
+  } else {
+    relevant = ragKeywordSearch(query, 4);
+  }
+  if (!relevant.length) return '';
+  return `\n\nREFERENCE DOCUMENT (${ragFileName}):\n${relevant.join('\n---\n')}`;
+}
+
+async function testRAG() {
+  const q = document.getElementById('ragTestQ').value.trim();
+  if (!q) return;
+  if (!ragChunks.length) { alert('Please upload a document first.'); return; }
+
+  const answerEl = document.getElementById('ragTestAnswer');
+  answerEl.textContent = '⏳ Searching...';
+  answerEl.classList.add('show');
+
+  const mode = document.querySelector('input[name="ragMode"]:checked')?.value || 'keyword';
+  let context = [];
+
+  if (mode === 'api') {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    if (!apiKey) {
+      answerEl.textContent = '⚠️ API mode requires an API key. Switch to Keyword mode or add your key above.';
+      return;
+    }
+    context = await ragAPISearch(q, 3);
+  } else {
+    context = ragKeywordSearch(q, 4);
+  }
+
+  if (!context.length) {
+    answerEl.textContent = '❌ No relevant content found for this query in the document.';
+    return;
+  }
+
+  if (mode === 'keyword') {
+    // Keyword: show raw chunks
+    answerEl.textContent = `📄 Most relevant excerpts from "${ragFileName}":\n\n` + context.map((c,i) => `[${i+1}] ${c.substring(0,300)}...`).join('\n\n');
+  } else {
+    // API: get a proper answer
+    try {
+      const answer = await callAPI(
+        `You are a safety expert. Answer the question based ONLY on the provided document excerpts. Be concise and cite the relevant information. If the answer is not in the document, say so.`,
+        `Question: ${q}\n\nDocument excerpts from "${ragFileName}":\n${context.join('\n---\n')}`
+      );
+      answerEl.textContent = answer;
+    } catch(e) {
+      answerEl.textContent = '⚠️ API error: ' + e.message;
+    }
+  }
 }
 
 // ── MAIN RUNNER ──────────────────────────────────────────
@@ -995,83 +1806,140 @@ async function runJSA() {
 
   hideError();
   fullRawOutput = '';
-  // Only delay for Groq due to rate limiting
   const delay = currentProvider === 'groq' ? 30000 : 500;
 
   document.getElementById('runBtn').disabled = true;
-  document.getElementById('runBtn').textContent = '⏳ Running Analysis...';
+  document.getElementById('runBtn').textContent = '⏳ Analyzing task...';
   document.getElementById('progressSection').style.display = 'block';
   document.getElementById('reportSection').style.display = 'none';
-  resetAgents();
 
   try {
-    // Agent 1
-    setAgent(1,'active');
+    // ── AGENT 0: Task Analyzer ──
+    document.getElementById('agentsGrid').innerHTML = `
+      <div class="agent-card active" style="grid-column:1/-1">
+        <div class="agent-dot"></div>
+        <div><div class="agent-name">🧠 Task Analyzer</div>
+        <div class="agent-status">Determining required agents...</div></div>
+      </div>`;
+    document.getElementById('dynamicPlanBadge').style.display = 'none';
+
+    const plan = await agentTaskAnalyzer(task);
+    const safeReason = String(plan.reason || '').replace(/\*\*/g,'').substring(0, 200);
+    const ragNote = (ragActive && ragFileName) ? `📚 RAG ACTIVE — JSA based on: ${ragFileName}\n\n` : '📖 No document — using general AI knowledge\n\n';
+    fullRawOutput += ragNote;
+    fullRawOutput += `🧠 AGENT 0 — TASK ANALYZER\nComplexity: ${plan.complexity}\nAgents: ${plan.total_agents}\nOptional: ${plan.optional_agents.join(', ')||'none'}\nReason: ${safeReason}\n\n`;
+
+    const agentList = renderDynamicAgents(plan);
+    document.getElementById('runBtn').textContent = '⏳ Running Analysis...';
+
+    // ── AGENT 1: Project Manager ──
+    setDynamicAgent('pm','active');
     const steps = await agentProjectManager(task);
     fullRawOutput += '🔵 AGENT 1 — PROJECT MANAGER\n'+steps+'\n\n';
-    setAgent(1,'done');
+    setDynamicAgent('pm','done');
 
-    // Agent 2
-    await sleepWithCountdown(delay,2);
-    setAgent(2,'active');
-    const hazards = await agentRiskIdentifier(steps);
+    // ── AGENT 2: Risk Identifier ──
+    await sleepDynamic(delay,'ri');
+    setDynamicAgent('ri','active');
+    const ragContext = await getRAGContext(task + ' ' + steps);
+    const hazards = await agentRiskIdentifier(steps, ragContext);
     fullRawOutput += '🟡 AGENT 2 — RISK IDENTIFIER\n'+hazards+'\n\n';
-    setAgent(2,'done');
+    setDynamicAgent('ri','done');
 
-    // Agent 2.5 — OSHA Matcher (JS search + API selection)
-    document.getElementById('agent-2').querySelector('.agent-status').textContent = 'Searching OSHA...';
-    await sleepWithCountdown(delay, 3);
+    // ── AGENT 2.5: OSHA Matcher ──
+    await sleepDynamic(delay,'om');
+    setDynamicAgent('om','active');
     let oshaEvidence = '';
     try {
       oshaEvidence = await agentOSHAMatcher(hazards);
       fullRawOutput += '🔶 AGENT 2.5 — OSHA MATCHER\n'+oshaEvidence+'\n\n';
     } catch(e) {
-      oshaEvidence = '';
       fullRawOutput += '🔶 AGENT 2.5 — OSHA MATCHER (skipped)\n\n';
     }
+    setDynamicAgent('om','done');
 
-    // Agent 3
-    setAgent(3,'active');
-    let assessments = await agentRiskAssessor(hazards, null, oshaEvidence);
-    fullRawOutput += '🟠 AGENT 3 — RISK ASSESSOR (Pass 1)\n'+assessments+'\n\n';
-    setAgent(3,'done');
+    // ── OPTIONAL AGENTS ──
+    let specialistContext = '';
 
-    // Agent 4
-    await sleepWithCountdown(delay,4);
-    setAgent(4,'active');
+    if (plan.optional_agents.includes('equipment_specialist')) {
+      await sleepDynamic(delay,'eq');
+      setDynamicAgent('eq','active');
+      const eqReport = await agentEquipmentSpecialist(steps, hazards);
+      specialistContext += '\n\nEQUIPMENT SPECIALIST:\n' + eqReport;
+      fullRawOutput += '⚙️ EQUIPMENT SPECIALIST\n'+eqReport+'\n\n';
+      setDynamicAgent('eq','done');
+    }
+
+    if (plan.optional_agents.includes('confined_space')) {
+      await sleepDynamic(delay,'cs');
+      setDynamicAgent('cs','active');
+      const csReport = await agentConfinedSpace(steps, hazards);
+      specialistContext += '\n\nCONFINED SPACE SPECIALIST:\n' + csReport;
+      fullRawOutput += '🕳️ CONFINED SPACE SPECIALIST\n'+csReport+'\n\n';
+      setDynamicAgent('cs','done');
+    }
+
+    if (plan.optional_agents.includes('traffic_control')) {
+      await sleepDynamic(delay,'tc');
+      setDynamicAgent('tc','active');
+      const tcReport = await agentTrafficControl(steps, hazards);
+      specialistContext += '\n\nTRAFFIC CONTROL SPECIALIST:\n' + tcReport;
+      fullRawOutput += '🚦 TRAFFIC CONTROL SPECIALIST\n'+tcReport+'\n\n';
+      setDynamicAgent('tc','done');
+    }
+
+    if (plan.optional_agents.includes('chemical_hazards')) {
+      await sleepDynamic(delay,'ch');
+      setDynamicAgent('ch','active');
+      const chReport = await agentChemicalHazards(steps, hazards);
+      specialistContext += '\n\nCHEMICAL HAZARDS SPECIALIST:\n' + chReport;
+      fullRawOutput += '⚗️ CHEMICAL HAZARDS SPECIALIST\n'+chReport+'\n\n';
+      setDynamicAgent('ch','done');
+    }
+
+    // ── AGENT 3: Risk Assessor ──
+    await sleepDynamic(delay,'ra');
+    setDynamicAgent('ra','active');
+    let assessments = await agentRiskAssessor(hazards + specialistContext, null, oshaEvidence);
+    fullRawOutput += '🟠 AGENT 3 — RISK ASSESSOR\n'+assessments+'\n\n';
+    setDynamicAgent('ra','done');
+
+    // ── AGENT 4: Risk Manager ──
+    await sleepDynamic(delay,'rm');
+    setDynamicAgent('rm','active');
     let review = await agentRiskManager(assessments);
     fullRawOutput += '🔴 AGENT 4 — RISK MANAGER\n'+review+'\n\n';
-    setAgent(4,'done');
+    setDynamicAgent('rm','done');
 
     // Feedback loop
     if (review.includes('REVISION NEEDED')) {
       document.getElementById('feedbackBadge').style.display='flex';
-      await sleepWithCountdown(delay,3);
-      setAgent(3,'active');
-      assessments = await agentRiskAssessor(hazards, review, oshaEvidence);
+      await sleepDynamic(delay,'ra');
+      setDynamicAgent('ra','active');
+      assessments = await agentRiskAssessor(hazards + specialistContext, review, oshaEvidence);
       fullRawOutput += '🔄 AGENT 3 — REVISED\n'+assessments+'\n\n';
-      setAgent(3,'done');
+      setDynamicAgent('ra','done');
 
-      await sleepWithCountdown(delay,4);
-      setAgent(4,'active');
+      await sleepDynamic(delay,'rm');
+      setDynamicAgent('rm','active');
       review = await agentRiskManager(assessments);
       fullRawOutput += '🔄 AGENT 4 — RE-REVIEW\n'+review+'\n\n';
-      setAgent(4,'done');
+      setDynamicAgent('rm','done');
     }
 
-    // Agent 5
-    await sleepWithCountdown(delay,5);
-    setAgent(5,'active');
+    // ── AGENT 5: Safety Manager ──
+    await sleepDynamic(delay,'sm');
+    setDynamicAgent('sm','active');
     const controls = await agentSafetyManager(assessments);
     fullRawOutput += '🟢 AGENT 5 — SAFETY MANAGER\n'+controls+'\n\n';
-    setAgent(5,'done');
+    setDynamicAgent('sm','done');
 
-    // Agent 6
-    await sleepWithCountdown(delay,6);
-    setAgent(6,'active');
+    // ── AGENT 6: Reporter ──
+    await sleepDynamic(delay,'rp');
+    setDynamicAgent('rp','active');
     const report = await agentReporter(task,steps,hazards,assessments,controls,oshaEvidence);
     fullRawOutput += '🟣 AGENT 6 — REPORTER\n'+report+'\n\n';
-    setAgent(6,'done');
+    setDynamicAgent('rp','done');
 
     renderTable(parseReport(report));
     renderSummary(report);
@@ -1122,33 +1990,49 @@ function renderOSHA(oshaText) {
 
 function renderTable(rows) {
   const tbody=document.getElementById('reportTableBody');
+  const thead=document.getElementById('tableHeader');
   tbody.innerHTML='';
   if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px">No table parsed — check Raw Output tab</td></tr>';
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">No table parsed — check Raw Output tab</td></tr>';
     return;
   }
+
+  // Detect if 6 columns (with OSHA) or 5 (without)
+  const hasosha = rows.some(r => r.length >= 6);
+  if (thead) {
+    thead.innerHTML = hasosha
+      ? '<th>Job Step</th><th>Hazard</th><th>Likelihood</th><th>Impact</th><th>OSHA Evidence</th><th>Preventive Measures</th>'
+      : '<th>Job Step</th><th>Hazard</th><th>Likelihood</th><th>Impact</th><th>Preventive Measures</th>';
+  }
+
   rows.forEach(cols=>{
     const tr=document.createElement('tr');
     const l=cols[2]||'', im=cols[3]||'';
+    const osha = hasosha ? (cols[4]||'—') : '';
+    const measures = hasosha ? (cols.slice(5).join(' ')||'') : (cols.slice(4).join(' ')||'');
+    const oshaCell = hasosha ? `<td style="font-size:11px;color:${osha.includes('⚠️')?'#d97706':'var(--text-muted)'}">${osha}</td>` : '';
     tr.innerHTML=`<td>${cols[0]||''}</td><td>${cols[1]||''}</td>
       <td><span class="badge badge-p">${l}</span></td>
       <td><span class="badge ${getCBadge(im)}">${im}</span></td>
-      <td>${cols.slice(4).join(' ')||''}</td>`;
+      ${oshaCell}
+      <td>${measures}</td>`;
     tbody.appendChild(tr);
   });
 }
 
 function renderSummary(text) {
-  const sections=['Findings','Recommendations','Conclusion','Next Steps'];
+  const sections=['Key Statistics','Findings','Top 3 Critical Hazards','Recommendations','Conclusion','Next Steps'];
+  const icons = {'Key Statistics':'📊','Findings':'🔍','Top 3 Critical Hazards':'⚠️','Recommendations':'✅','Conclusion':'📋','Next Steps':'🚀'};
   const container=document.getElementById('summaryContent');
   container.innerHTML='';
   sections.forEach(sec=>{
-    const rx=new RegExp(`###?\\s*${sec}([\\s\\S]*?)(?=###?\\s*(${sections.join('|')})|$)`,'i');
+    const rx=new RegExp(`###?\\s*${sec.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}([\\s\\S]*?)(?=###?\\s*(${sections.map(s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})|$)`,'i');
     const m=text.match(rx);
-    if(m){
+    if(m && m[1].trim()){
       const card=document.createElement('div');
       card.className='report-card';
-      card.innerHTML=`<h4>${sec}</h4><p>${m[1].replace(/\*\*/g,'').trim().replace(/\n/g,'<br>')}</p>`;
+      const content = m[1].replace(/\*\*/g,'').trim().replace(/\n/g,'<br>');
+      card.innerHTML=`<h4>${icons[sec]||''} ${sec}</h4><p>${content}</p>`;
       container.appendChild(card);
     }
   });
@@ -1169,6 +2053,45 @@ function exportTXT(){
   a.href=URL.createObjectURL(blob);
   a.download='JSA_Report.txt';
   a.click();
+}
+
+async function importTXT(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  fullRawOutput = text;
+
+  // Extract task name
+  const taskMatch = text.match(/JSA for:\s*(.+)/);
+  if (taskMatch) document.getElementById('taskInput').value = taskMatch[1].trim();
+
+  // Extract reporter section for table and summary
+  const reporterMatch = text.match(/🟣 AGENT 6 — REPORTER\n([\s\S]+?)(?=\n🟣|\n✅|$)/);
+  const reportText = reporterMatch ? reporterMatch[1] : text;
+
+  // Extract OSHA section
+  const oshaMatch = text.match(/🔶 AGENT 2\.5 — OSHA MATCHER\n([\s\S]+?)(?=\n🟠|$)/);
+  const oshaText = oshaMatch ? oshaMatch[1].trim() : '';
+
+  // Show report section
+  document.getElementById('reportSection').style.display = 'block';
+  document.getElementById('rawOutput').textContent = text;
+
+  renderTable(parseReport(reportText));
+  renderSummary(reportText);
+  renderOSHA(oshaText);
+
+  // Show import badge
+  showImportBadge(file.name);
+  document.getElementById('reportSection').scrollIntoView({behavior:'smooth'});
+
+  // Reset file input
+  event.target.value = '';
+}
+
+function showImportBadge(filename) {
+  const header = document.querySelector('.report-header h2');
+  if (header) header.innerHTML = `📋 JSA Report <span style="font-size:12px;font-weight:400;color:var(--text-muted);margin-left:8px">imported from ${filename}</span>`;
 }
 
 function exportCSV(){
