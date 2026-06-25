@@ -692,6 +692,7 @@ footer strong { color: var(--pitt-blue); }
     </div>
     <div class="tabs">
       <button class="tab active" onclick="showTab('table')">Risk Table</button>
+      <button class="tab" onclick="showTab('osha')">OSHA Evidence</button>
       <button class="tab" onclick="showTab('summary')">Summary</button>
       <button class="tab" onclick="showTab('raw')">Raw Output</button>
     </div>
@@ -706,6 +707,9 @@ footer strong { color: var(--pitt-blue); }
           <tbody id="reportTableBody"></tbody>
         </table>
       </div>
+    </div>
+    <div class="tab-content" id="tab-osha">
+      <div id="oshaContent"></div>
     </div>
     <div class="tab-content" id="tab-summary">
       <div id="summaryContent"></div>
@@ -810,7 +814,7 @@ function updateModels() {
 function setTask(t) { document.getElementById('taskInput').value = t; }
 
 function showTab(name) {
-  const names = ['table','summary','raw'];
+  const names = ['table','osha','summary','raw'];
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i]===name));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
@@ -1071,6 +1075,7 @@ async function runJSA() {
 
     renderTable(parseReport(report));
     renderSummary(report);
+    renderOSHA(oshaEvidence);
     document.getElementById('rawOutput').textContent = fullRawOutput;
     document.getElementById('reportSection').style.display = 'block';
     document.getElementById('reportSection').scrollIntoView({behavior:'smooth'});
@@ -1099,6 +1104,20 @@ function getCBadge(c) {
   if(n<=2) return 'badge-c-low';
   if(n<=4) return 'badge-c-mid';
   return 'badge-c-high';
+}
+
+function renderOSHA(oshaText) {
+  const container = document.getElementById('oshaContent');
+  if (!oshaText || oshaText.includes('No relevant') || oshaText.includes('No matching') || oshaText.trim()==='' ) {
+    container.innerHTML = `<div class="report-card"><h4>No OSHA Matches Found</h4><p>No closely related OSHA incidents were found for this task.</p></div>`;
+    return;
+  }
+  container.innerHTML = `
+    <div style="background:rgba(0,53,148,0.04);border:1px solid rgba(0,53,148,0.15);border-radius:10px;padding:18px 22px;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--pitt-blue);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">📋 Real OSHA Incidents — Evidence-Based Assessment</div>
+      <p style="font-size:13px;line-height:1.8;color:var(--text-muted);white-space:pre-wrap">${oshaText}</p>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);padding:8px 4px">ℹ️ These real incidents from the OSHA IMIS database were used to calibrate likelihood and impact ratings.</div>`;
 }
 
 function renderTable(rows) {
