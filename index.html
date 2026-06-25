@@ -1783,40 +1783,24 @@ function extractDocumentActivities(text) {
   const quickArea = document.getElementById('quickTasksArea');
   if (!listEl) return;
 
-  listEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px">⏳ Extracting activities from document...</span>';
+  const apiKey = document.getElementById('apiKey').value.trim();
 
-  // Wait a moment for API key to be available, then extract
-  setTimeout(async () => {
-    const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) {
+    listEl.innerHTML = `<span style="color:var(--text-muted);font-size:12px">⌛ Enter your API key above, then </span><button class="wizard-reset" style="font-size:12px;color:var(--pitt-blue)" onclick="retryExtract()">extract activities ↺</button>`;
+    return;
+  }
 
-    if (!apiKey) {
-      // No API key yet — show message and add listener to retry when key is entered
-      listEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px">⌛ Enter your API key above to extract activities from this document.</span>';
-      // Watch for API key input
-      const keyInput = document.getElementById('apiKey');
-      const onKeyEntered = async () => {
-        if (keyInput.value.trim().length > 10) {
-          keyInput.removeEventListener('input', onKeyEntered);
-          await doExtractActivities(text, listEl, quickArea);
-        }
-      };
-      keyInput.addEventListener('input', onKeyEntered);
-      return;
-    }
-
-    await doExtractActivities(text, listEl, quickArea);
-  }, 500);
+  doExtractActivities(text, listEl, quickArea);
 }
 
 async function doExtractActivities(text, listEl, quickArea) {
   listEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px">⏳ Extracting activities from document...</span>';
 
   try {
-    // Use first 6 chunks (most likely table of contents / intro)
     const sample = ragChunks.slice(0, 6).join('\n\n');
 
     const result = await callAPI(
-      `You are a construction safety expert. Extract a list of specific construction activities or operations described in this document. These should be tasks that could be analyzed in a Job Safety Analysis (JSA).
+      `You are a construction safety expert. Extract a list of specific construction activities or operations described in this document that could be analyzed in a Job Safety Analysis (JSA).
 Return ONLY a valid JSON array of short activity names (max 8 words each). No markdown, no explanation.
 Example: ["Excavation and trenching operations","Machine transport on public road"]`,
       `Document excerpt:\n${sample}`
@@ -1826,7 +1810,6 @@ Example: ["Excavation and trenching operations","Machine transport on public roa
     const e = result.lastIndexOf(']');
     if (s === -1) throw new Error('no array');
     const activities = JSON.parse(result.substring(s, e + 1));
-
     if (!activities || activities.length === 0) throw new Error('empty');
 
     // Show in ragStateC
@@ -1844,8 +1827,20 @@ Example: ["Excavation and trenching operations","Machine transport on public roa
     }
 
   } catch(err) {
-    listEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px">Could not extract activities — type your task below.</span>';
+    listEl.innerHTML = `<span style="color:var(--text-muted);font-size:12px">Could not extract. </span>
+      <button class="wizard-reset" style="font-size:12px;color:var(--pitt-blue)" onclick="retryExtract()">↺ Try again</button>`;
   }
+}
+
+function retryExtract() {
+  const listEl = document.getElementById('ragActivitiesList');
+  const quickArea = document.getElementById('quickTasksArea');
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) {
+    if (listEl) listEl.innerHTML = '<span style="color:#dc2626;font-size:12px">⚠️ Please enter your API key above first.</span>';
+    return;
+  }
+  doExtractActivities(null, listEl, quickArea);
 }
 
 function extractPDFText(bytes) {
