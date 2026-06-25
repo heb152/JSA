@@ -1797,38 +1797,50 @@ async function doExtractActivities(text, listEl, quickArea) {
   listEl.innerHTML = '<span style="color:var(--text-muted);font-size:12px">⏳ Extracting activities from document...</span>';
 
   try {
-    const sample = ragChunks.slice(0, 6).join('\n\n');
+    if (!ragChunks || ragChunks.length === 0) throw new Error('No document loaded');
+
+    // Take chunks from beginning, middle, and end to get better coverage
+    const total = ragChunks.length;
+    const picks = [
+      ...ragChunks.slice(0, 4),
+      ...ragChunks.slice(Math.floor(total * 0.2), Math.floor(total * 0.2) + 3),
+      ...ragChunks.slice(Math.floor(total * 0.4), Math.floor(total * 0.4) + 3),
+    ];
+    const sample = picks.join('\n\n').substring(0, 4000);
 
     const result = await callAPI(
-      `You are a construction safety expert. Extract a list of specific construction activities or operations described in this document that could be analyzed in a Job Safety Analysis (JSA).
-Return ONLY a valid JSON array of short activity names (max 8 words each). No markdown, no explanation.
-Example: ["Excavation and trenching operations","Machine transport on public road"]`,
-      `Document excerpt:\n${sample}`
+      `Read the document excerpts below and identify construction activities, operations, or tasks that a worker would perform. These will be used for Job Safety Analysis (JSA).
+
+Return a JSON array of 6-10 activity names. Each name should be a clear task description of 3-8 words.
+Return ONLY the JSON array, nothing else. No markdown backticks.
+
+If you cannot find specific activities, infer them from the document type and content.`,
+      `DOCUMENT EXCERPTS:\n${sample}`
     );
 
+    // Try to extract JSON array
     const s = result.indexOf('[');
     const e = result.lastIndexOf(']');
-    if (s === -1) throw new Error('no array');
-    const activities = JSON.parse(result.substring(s, e + 1));
-    if (!activities || activities.length === 0) throw new Error('empty');
+    if (s === -1) throw new Error('No JSON array in response');
 
-    // Show in ragStateC
+    const activities = JSON.parse(result.substring(s, e + 1));
+    if (!Array.isArray(activities) || activities.length === 0) throw new Error('Empty list returned');
+
     listEl.innerHTML =
       activities.map(a =>
-        `<button class="quick-btn" style="margin:2px 4px 4px 0" onclick="setTask('${a.replace(/'/g,"\\'")}')">📋 ${a}</button>`
+        `<button class="quick-btn" style="margin:2px 4px 4px 0" onclick="setTask('${String(a).replace(/'/g,"\\'")}')">📋 ${a}</button>`
       ).join('');
 
-    // Replace quick-tasks in taskCard
     if (quickArea) {
       quickArea.innerHTML = `<span>From document:</span>` +
         activities.map(a =>
-          `<button class="quick-btn" onclick="setTask('${a.replace(/'/g,"\\'")}')">📋 ${a}</button>`
+          `<button class="quick-btn" onclick="setTask('${String(a).replace(/'/g,"\\'")}')">📋 ${a}</button>`
         ).join('');
     }
 
   } catch(err) {
-    listEl.innerHTML = `<span style="color:var(--text-muted);font-size:12px">Could not extract. </span>
-      <button class="wizard-reset" style="font-size:12px;color:var(--pitt-blue)" onclick="retryExtract()">↺ Try again</button>`;
+    listEl.innerHTML = `<span style="color:#dc2626;font-size:11px">⚠️ ${err.message}</span>
+      <button class="wizard-reset" style="font-size:12px;color:var(--pitt-blue);margin-left:8px" onclick="retryExtract()">↺ Try again</button>`;
   }
 }
 
