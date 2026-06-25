@@ -2000,23 +2000,32 @@ async function runJSA() {
 
   // ── CHECK: if guide loaded, verify task is relevant to document ──
   if (ragActive && ragChunks.length) {
-    // Use AI to check relevance — more reliable than keyword matching
     try {
       const sample = ragChunks.slice(0, 4).join('\n\n').substring(0, 2000);
       const check = await callAPI(
-        `You are a document relevance checker. Given a document excerpt and a task, answer ONLY with "YES" or "NO".
-Is the task described or related to the equipment/procedures in this document?
-Answer YES only if the document contains relevant safety procedures, operations, or equipment directly related to this task.
-Answer NO if the task is unrelated to the document's topic.`,
-        `Document: "${ragFileName}"\nDocument excerpt:\n${sample}\n\nTask: "${task}"\n\nIs this task covered in the document? Answer only YES or NO.`
+        `You are a document relevance checker. Given a document and a task description, decide if the task is related to the equipment, machinery, or procedures described in the document.
+
+Be LENIENT — if the task involves the same type of equipment, machinery, or work site as the document, answer YES even if the exact procedure is not described word-for-word.
+
+Examples of YES:
+- Document is about excavators → task is "loading excavator onto truck" → YES (same equipment)
+- Document is about asphalt pavers → task is "paving a road section" → YES (same equipment)
+- Document is about excavators → task is "digging a trench" → YES (core operation)
+
+Examples of NO:
+- Document is about excavators → task is "electrical wiring installation" → NO (unrelated)
+- Document is about asphalt pavers → task is "concrete formwork" → NO (different trade)
+
+Answer ONLY with YES or NO, nothing else.`,
+        `Document title: "${ragFileName}"\nDocument excerpt:\n${sample}\n\nTask: "${task}"\n\nIs this task related to the equipment or work described in this document? Answer YES or NO.`
       );
 
       const isRelevant = check.trim().toUpperCase().startsWith('YES');
 
       if (!isRelevant) {
         const proceed = confirm(
-          `⚠️ This task is not covered in "${ragFileName}".\n\n` +
-          `"${task}" does not appear to be related to the equipment or procedures described in this document.\n\n` +
+          `⚠️ This task may not be covered in "${ragFileName}".\n\n` +
+          `"${task}" does not appear to be related to the equipment or procedures in this document.\n\n` +
           `Click OK to run JSA using general AI knowledge instead.\n` +
           `Click Cancel to go back and choose a different task.`
         );
@@ -2026,7 +2035,7 @@ Answer NO if the task is unrelated to the document's topic.`,
         if (badge) badge.style.opacity = '0.5';
       }
     } catch(e) {
-      // If check fails, continue normally
+      // If check fails, continue normally without blocking
     }
   }
 
