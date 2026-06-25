@@ -1799,26 +1799,25 @@ async function doExtractActivities(text, listEl, quickArea) {
   try {
     if (!ragChunks || ragChunks.length === 0) throw new Error('No document loaded');
 
-    // Take chunks from beginning, middle, and end to get better coverage
     const total = ragChunks.length;
     const picks = [
-      ...ragChunks.slice(0, 4),
-      ...ragChunks.slice(Math.floor(total * 0.2), Math.floor(total * 0.2) + 3),
-      ...ragChunks.slice(Math.floor(total * 0.4), Math.floor(total * 0.4) + 3),
+      ...ragChunks.slice(0, 3),
+      ...ragChunks.slice(Math.floor(total * 0.25), Math.floor(total * 0.25) + 3),
+      ...ragChunks.slice(Math.floor(total * 0.5), Math.floor(total * 0.5) + 2),
     ];
     const sample = picks.join('\n\n').substring(0, 4000);
 
     const result = await callAPI(
-      `Read the document excerpts below and identify construction activities, operations, or tasks that a worker would perform. These will be used for Job Safety Analysis (JSA).
+      `You are a construction safety expert. The document below is from: "${ragFileName}".
 
-Return a JSON array of 6-10 activity names. Each name should be a clear task description of 3-8 words.
-Return ONLY the JSON array, nothing else. No markdown backticks.
+Based on the document content AND the document title/filename, identify 6-10 specific construction activities or operations that would need a Job Safety Analysis (JSA).
 
-If you cannot find specific activities, infer them from the document type and content.`,
-      `DOCUMENT EXCERPTS:\n${sample}`
+IMPORTANT: Activities must be relevant to the equipment or topic described in this document (e.g. if it's an excavator manual, list excavation activities; if it's a paver manual, list paving activities).
+
+Return ONLY a valid JSON array of activity names (4-8 words each). No markdown, no explanation.`,
+      `DOCUMENT CONTENT:\n${sample}`
     );
 
-    // Try to extract JSON array
     const s = result.indexOf('[');
     const e = result.lastIndexOf(']');
     if (s === -1) throw new Error('No JSON array in response');
@@ -1999,6 +1998,38 @@ async function runJSA() {
   if (!apiKey) { showError('Please enter your API Key.'); return; }
   if (!task) { showError('Please enter a construction task.'); return; }
 
+  // ── CHECK: if guide loaded, verify task is relevant to document ──
+  if (ragActive && ragChunks.length) {
+    // Use AI to check relevance — more reliable than keyword matching
+    try {
+      const sample = ragChunks.slice(0, 4).join('\n\n').substring(0, 2000);
+      const check = await callAPI(
+        `You are a document relevance checker. Given a document excerpt and a task, answer ONLY with "YES" or "NO".
+Is the task described or related to the equipment/procedures in this document?
+Answer YES only if the document contains relevant safety procedures, operations, or equipment directly related to this task.
+Answer NO if the task is unrelated to the document's topic.`,
+        `Document: "${ragFileName}"\nDocument excerpt:\n${sample}\n\nTask: "${task}"\n\nIs this task covered in the document? Answer only YES or NO.`
+      );
+
+      const isRelevant = check.trim().toUpperCase().startsWith('YES');
+
+      if (!isRelevant) {
+        const proceed = confirm(
+          `⚠️ This task is not covered in "${ragFileName}".\n\n` +
+          `"${task}" does not appear to be related to the equipment or procedures described in this document.\n\n` +
+          `Click OK to run JSA using general AI knowledge instead.\n` +
+          `Click Cancel to go back and choose a different task.`
+        );
+        if (!proceed) return;
+        ragActive = false;
+        const badge = document.querySelector('#ragCard .rag-file-info');
+        if (badge) badge.style.opacity = '0.5';
+      }
+    } catch(e) {
+      // If check fails, continue normally
+    }
+  }
+
   hideError();
   fullRawOutput = '';
   const delay = currentProvider === 'groq' ? 30000 : 500;
@@ -2157,6 +2188,12 @@ async function runJSA() {
 
   document.getElementById('runBtn').disabled = false;
   document.getElementById('runBtn').textContent = '▶ Run Job Safety Analysis';
+  // Restore RAG state if it was temporarily disabled
+  if (!ragActive && ragChunks.length) {
+    ragActive = true;
+    const badge = document.querySelector('#ragCard .rag-file-info');
+    if (badge) badge.style.opacity = '1';
+  }
 }
 
 // ── RENDER ───────────────────────────────────────────────
